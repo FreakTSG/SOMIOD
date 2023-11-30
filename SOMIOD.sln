@@ -5,6 +5,10 @@ VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOMIOD-IS", "SOMIOD-IS\SOMIOD-IS.csproj", "{AE74AC61-D3FD-45E4-B0FF-4C50AE3348A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App1", "App1\App1.csproj", "{C787678D-5E9D-4E47-A910-AD6901CA2C3B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App2", "App2\App2.csproj", "{EEDD7E16-58FF-4208-A4B9-D3A402457849}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{AE74AC61-D3FD-45E4-B0FF-4C50AE3348A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE74AC61-D3FD-45E4-B0FF-4C50AE3348A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE74AC61-D3FD-45E4-B0FF-4C50AE3348A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C787678D-5E9D-4E47-A910-AD6901CA2C3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C787678D-5E9D-4E47-A910-AD6901CA2C3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C787678D-5E9D-4E47-A910-AD6901CA2C3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C787678D-5E9D-4E47-A910-AD6901CA2C3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEDD7E16-58FF-4208-A4B9-D3A402457849}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEDD7E16-58FF-4208-A4B9-D3A402457849}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEDD7E16-58FF-4208-A4B9-D3A402457849}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEDD7E16-58FF-4208-A4B9-D3A402457849}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
