@@ -1,5 +1,9 @@
-﻿using System;
+﻿using SOMIOD_IS.Models;
+using SOMIOD_IS.SqlHelpers;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Common;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -7,33 +11,101 @@ using System.Web.Http;
 
 namespace SOMIOD_IS.Controllers
 {
+    [RoutePrefix("api/somiod")]
     public class SomiodController : ApiController
     {
-        // GET: api/Somiod
-        public IEnumerable<string> Get()
+
+
+        #region application
+        // GETAll: application
+        [Route("api/somiod")]
+        public HttpResponseMessage GetApplications()
         {
-            return new string[] { "value1", "value2" };
+            var applications = DbHelper.GetApplications();
+            return Request.CreateResponse(HttpStatusCode.OK);
+            /*try
+            {
+                var applications = DbHelper.GetApplications();
+                return RequestHelper.CreateMessage(Request, applications);
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }/*/
         }
 
-        // GET: api/Somiod/5
-        public string Get(int id)
+        [Route("api/somiod/{application}")]
+        public HttpResponseMessage GetApplication(string application)
         {
-            return "value";
+            var app = DbHelper.GetApplication(application);
+            return Request.CreateResponse(HttpStatusCode.OK);
+            /*try
+            {
+                var app = DbHelper.GetApplication(application);
+                return RequestHelper.CreateMessage(Request, app);
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }*/
         }
 
-        // POST: api/Somiod
-        public void Post([FromBody]string value)
+        [Route("api/somiod")]
+        public HttpResponseMessage Post([FromBody] Application newApp)
         {
+            DbHelper.CreateApplication(newApp.Name);
+            return Request.CreateResponse(HttpStatusCode.OK, "Application created");
+            /*try
+            {
+                if (newApp == null)
+                    throw new UnprocessableEntityException("You must provide an application with a name in the correct xml format");
+
+                if (string.IsNullOrEmpty(newApp.Name))
+                    throw new UnprocessableEntityException("You must include the name of your new application");
+
+                DbHelper.CreateApplication(newApp.Name);
+                return RequestHelper.CreateMessage(Request, "Application created");
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }/*/
         }
 
-        // PUT: api/Somiod/5
-        public void Put(int id, [FromBody]string value)
+        [Route("api/somiod/{application}")]
+        public HttpResponseMessage Put(string application, [FromBody] Application newAppDetails)
         {
+            string newName = newAppDetails.Name;
+            DbHelper.UpdateApplication(application, newName);
+            return Request.CreateResponse(HttpStatusCode.OK, "Application updated");
+            /*try
+            {
+                if (newAppDetails == null)
+                    throw new UnprocessableEntityException("You must provide an application with a name in the correct xml format");
+
+                if (string.IsNullOrEmpty(newAppDetails.Name))
+                    throw new UnprocessableEntityException("You must include the updated name of the application");
+
+                string newName = newAppDetails.Name;
+                DbHelper.UpdateApplication(application, newName);
+                return Request.CreateResponse(HttpStatusCode.OK, "Application updated");
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }/*/
         }
 
-        // DELETE: api/Somiod/5
+        // DELETE: application/{id}
         public void Delete(int id)
         {
         }
+
+        #endregion
+        //Container
+
+        //Data
+
+        //Subscription
     }
 }
