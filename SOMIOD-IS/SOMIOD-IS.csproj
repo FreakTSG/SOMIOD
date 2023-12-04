@@ -91,6 +91,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\SomiodController.cs" />
+    <Compile Include="Controllers\UnprocessableEntityException.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -105,6 +106,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="SqlHelpers\DbHelper.cs" />
+    <Compile Include="SqlHelpers\ModelNotFoundException.cs" />
+    <Compile Include="SqlHelpers\RequestHelper.cs" />
+    <Compile Include="SqlHelpers\XmlHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -11,7 +11,7 @@ using System.Web.Http;
 
 namespace SOMIOD_IS.Controllers
 {
-    
+
     public class SomiodController : ApiController
     {
 
@@ -21,9 +21,7 @@ namespace SOMIOD_IS.Controllers
         [Route("api/somiod")]
         public HttpResponseMessage GetApplications()
         {
-            var applications = DbHelper.GetApplications();
-            return Request.CreateResponse(HttpStatusCode.OK);
-            /*try
+            try
             {
                 var applications = DbHelper.GetApplications();
                 return RequestHelper.CreateMessage(Request, applications);
@@ -31,15 +29,13 @@ namespace SOMIOD_IS.Controllers
             catch (Exception e)
             {
                 return RequestHelper.CreateError(Request, e);
-            }/*/
+            }
         }
 
         [Route("api/somiod/{application}")]
         public HttpResponseMessage GetApplication(string application)
         {
-            var app = DbHelper.GetApplication(application);
-            return Request.CreateResponse(HttpStatusCode.OK);
-            /*try
+            try
             {
                 var app = DbHelper.GetApplication(application);
                 return RequestHelper.CreateMessage(Request, app);
@@ -47,7 +43,7 @@ namespace SOMIOD_IS.Controllers
             catch (Exception e)
             {
                 return RequestHelper.CreateError(Request, e);
-            }*/
+            }
         }
 
         [Route("api/somiod")]
@@ -73,10 +69,7 @@ namespace SOMIOD_IS.Controllers
         [Route("api/somiod/{application}")]
         public HttpResponseMessage Put(string application, [FromBody] Application newAppDetails)
         {
-            string newName = newAppDetails.Name;
-            DbHelper.UpdateApplication(application, newName);
-            return Request.CreateResponse(HttpStatusCode.OK, "Application updated");
-            /*try
+            try
             {
                 if (newAppDetails == null)
                     throw new UnprocessableEntityException("You must provide an application with a name in the correct xml format");
@@ -91,12 +84,28 @@ namespace SOMIOD_IS.Controllers
             catch (Exception e)
             {
                 return RequestHelper.CreateError(Request, e);
-            }/*/
+            }
         }
 
-        // DELETE: application/{id}
-        public void Delete(int id)
+        // DELETE: application
+        [HttpDelete]
+        [Route("api/somiod/{id:int}")]
+        public IHttpActionResult DeleteApplication(int id)
         {
+            try
+            {
+                bool isDeleted = DbHelper.DeleteApplication(id);
+                if (!isDeleted)
+                {
+                    return NotFound(); // Return 404 if the application doesn't exist
+                }
+
+                return Ok(); // Return 200 OK if the deletion was successful
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e); // Return 500 in case of an exception
+            }
         }
 
         #endregion

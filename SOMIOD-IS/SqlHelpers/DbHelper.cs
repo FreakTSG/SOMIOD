@@ -107,6 +107,36 @@ namespace SOMIOD_IS.SqlHelpers
         }
 
 
+        public static bool DeleteApplication(int id)
+        {
+            using (var connection = new DbConnection())
+            {
+                var db = connection.Open();
+
+                // Check if the application exists
+                string checkQuery = "SELECT COUNT(1) FROM Application WHERE Id = @Id";
+                using (SqlCommand checkCommand = new SqlCommand(checkQuery, db))
+                {
+                    checkCommand.Parameters.AddWithValue("@Id", id);
+                    int exists = (int)checkCommand.ExecuteScalar();
+                    if (exists == 0)
+                    {
+                        return false; // No application found with the given ID
+                    }
+                }
+
+                // Delete the application
+                string deleteQuery = "DELETE FROM Application WHERE Id = @Id";
+                using (SqlCommand deleteCommand = new SqlCommand(deleteQuery, db))
+                {
+                    deleteCommand.Parameters.AddWithValue("@Id", id);
+                    int rowsAffected = deleteCommand.ExecuteNonQuery();
+                    return rowsAffected > 0; // Returns true if the application was deleted
+                }
+            }
+        }
+
+
         #endregion 
 
         private class DbConnection : IDisposable
@@ -129,6 +159,8 @@ namespace SOMIOD_IS.SqlHelpers
             {
                 _conn.Close();
             }
+
+            
         }
 
     }
