@@ -11,7 +11,7 @@ using System.Web.Http;
 
 namespace SOMIOD_IS.Controllers
 {
-    [RoutePrefix("api/somiod")]
+    
     public class SomiodController : ApiController
     {
 
@@ -53,9 +53,7 @@ namespace SOMIOD_IS.Controllers
         [Route("api/somiod")]
         public HttpResponseMessage Post([FromBody] Application newApp)
         {
-            DbHelper.CreateApplication(newApp.Name);
-            return Request.CreateResponse(HttpStatusCode.OK, "Application created");
-            /*try
+            try
             {
                 if (newApp == null)
                     throw new UnprocessableEntityException("You must provide an application with a name in the correct xml format");
@@ -69,7 +67,7 @@ namespace SOMIOD_IS.Controllers
             catch (Exception e)
             {
                 return RequestHelper.CreateError(Request, e);
-            }/*/
+            }
         }
 
         [Route("api/somiod/{application}")]
