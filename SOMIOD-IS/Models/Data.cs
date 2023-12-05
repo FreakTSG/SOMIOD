@@ -11,7 +11,7 @@ namespace SOMIOD_IS.Models
         public string Name { get; set; }
         public string Content { get; set; }
         public string CreationDate { get; set; }
-        public string Parent { get; set; }
+        public int Parent { get; set; }
         public Data() { }
 
         public Data(int id, string name, string content, DateTime creationDate, int parent)
@@ -21,7 +21,7 @@ namespace SOMIOD_IS.Models
                 Name = name;
                 Content = content;
                 CreationDate = creationDate.ToString("yyyy-MM-dd HH:mm:ss");
-                Parent = parent.ToString();
+                Parent = parent;
             }
         }
         

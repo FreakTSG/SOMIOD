@@ -145,8 +145,17 @@ namespace SOMIOD_IS.Controllers
 
         #endregion
 
+        #region Data
         //Data
 
+
+
+        #endregion
+
+        #region Subscription
         //Subscription
+
+        #endregion
+
     }
 }

@@ -276,6 +276,78 @@ namespace SOMIOD_IS.SqlHelpers
 
         #endregion
 
+        #region Data
+
+        private static List<Data> GetDataResourcesForModule(int parentId)
+        {
+            var dataRes = new List<Data>();
+
+            using (var dbConn = new DbConnection())
+            using (var db = dbConn.Open())
+            {
+                var cmdText = "SELECT * FROM Data WHERE Parent=@Parent";
+                using (var cmd = new SqlCommand(cmdText, db))
+                {
+                    cmd.Parameters.AddWithValue("@Parent", parentId);
+
+                    try
+                    {
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                dataRes.Add(new Data(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), reader.GetInt32(3)));
+                            }
+                        }
+                    }
+                    catch (SqlException e)
+                    {
+                        // Handle or log the exception as needed
+                        throw new ApplicationException("Database operation failed", e);
+                    }
+                }
+            }
+
+            return dataRes;
+        }
+
+        private static void NotifySubscriptions(SqlConnection db, int parentId, string moduleName, string eventType, string data)
+        {
+            try
+            {
+                var notification = new Notification(eventType, data);
+
+                var cmdText = "SELECT * FROM Subscription WHERE Parent=@Parent AND (Event=@Event OR Event='BOTH')";
+                using (var cmd = new SqlCommand(cmdText, db))
+                {
+                    cmd.Parameters.AddWithValue("@Parent", parentId);
+                    cmd.Parameters.AddWithValue("@Event", eventType.ToUpper());
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            BrokerHelper.FireNotification(reader.GetString(5), moduleName, notification);
+                        }
+                    }
+                }
+            }
+            catch (SqlException e)
+            {
+                throw new BrokerException("An unknown database error (#" + e.Number + ") has happened while trying to notify subscriptions", e);
+            }
+        }
+
+
+
+        #endregion
+
+        #region Subscription
+
+
+
+        #endregion
+
         private class DbConnection : IDisposable
         {
             private readonly string _connStr = Settings.Default.ConnStr;
