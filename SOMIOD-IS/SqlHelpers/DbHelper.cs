@@ -338,6 +338,91 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
+        public static void CreateData(string appName, string moduleName, string dataContent)
+        {
+            /*using (var dbConn = new DbConnection())
+            using (var db = dbConn.Open())
+            using (var transaction = db.BeginTransaction())
+            {
+                try
+                {
+                    int parentId = IsContainerParentValid(db, appName, moduleName);
+
+                    var cmdText = "INSERT INTO Data (Content, CreationDate, Parent) VALUES (@Content, @CreationDate, @Parent)";
+                    using (var cmd = new SqlCommand(cmdText, db, transaction))
+                    {
+                        cmd.Parameters.AddWithValue("@Content", dataContent);
+                        cmd.Parameters.AddWithValue("@CreationDate", DateTime.Now);
+                        cmd.Parameters.AddWithValue("@Parent", parentId);
+
+                        int rowChng = cmd.ExecuteNonQuery();
+
+                        if (rowChng != 1)
+                            throw new UntreatedSqlException();
+
+                        NotifySubscriptions(db, parentId, moduleName, "CREATE", dataContent);
+                    }
+
+                    transaction.Commit();
+                }
+                catch (SqlException)
+                {
+                    transaction.Rollback();
+                    throw new UntreatedSqlException();
+                }
+            }*/
+        }
+
+        public static void DeleteData(string appName, string moduleName, int dataId)
+        {
+            /*using (var dbConn = new DbConnection())
+            using (var db = dbConn.Open())
+            using (var transaction = db.BeginTransaction())
+            {
+                try
+                {
+                    int parentId = IsContainerParentValid(db, appName, moduleName);
+
+                    var cmdText = "SELECT m.Id, d.Id, d.Content FROM Module m JOIN Data d ON (d.Parent = m.Id) WHERE d.Id=@DataId AND m.Name=@ModuleName";
+                    string dataContent;
+
+                    using (var cmd = new SqlCommand(cmdText, db, transaction))
+                    {
+                        cmd.Parameters.AddWithValue("@DataId", dataId);
+                        cmd.Parameters.AddWithValue("@ModuleName", moduleName.ToLower());
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (!reader.Read())
+                                throw new ModelNotFoundException("A data resource with the Id #" + dataId + " does not exist in the module " + moduleName, false);
+
+                            dataContent = reader.GetString(2);
+                        }
+                    }
+
+                    using (var deleteCmd = new SqlCommand("DELETE FROM Data WHERE Id=@Id", db, transaction))
+                    {
+                        deleteCmd.Parameters.AddWithValue("@Id", dataId);
+
+                        int rowChng = deleteCmd.ExecuteNonQuery();
+                        if (rowChng != 1)
+                            throw new UntreatedSqlException();
+
+                        NotifySubscriptions(db, parentId, moduleName, "DELETE", dataContent);
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }*/
+        }
+
+
+
 
 
         #endregion
