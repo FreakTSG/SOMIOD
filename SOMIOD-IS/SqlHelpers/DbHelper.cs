@@ -74,16 +74,19 @@ namespace SOMIOD_IS.SqlHelpers
             {
                 var db = connection.Open();
 
-                string query = "INSERT INTO Application (Name, CreationDate) VALUES (@AppName, @CreationDate); SELECT SCOPE_IDENTITY();";
+                string query = "INSERT INTO Application (Name, CreationDate) VALUES (@AppName, @CreationDate)";
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
                     command.Parameters.AddWithValue("@AppName", name.ToLower());
                     command.Parameters.AddWithValue("@CreationDate", DateTime.Now);
 
-                    // ExecuteScalar is used to retrieve the generated identity (Id) of the new row.
-                    int newApplicationId = Convert.ToInt32(command.ExecuteScalar());
-
+                    // Execute the insert command
                     command.ExecuteNonQuery();
+
+                    // Retrieve the last identity value for the Application table
+                    string identityQuery = "SELECT IDENT_CURRENT('Application')";
+                    SqlCommand identityCommand = new SqlCommand(identityQuery, db);
+                    int newApplicationId = Convert.ToInt32(identityCommand.ExecuteScalar());
                 }
             }
         }

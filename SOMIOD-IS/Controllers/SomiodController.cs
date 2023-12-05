@@ -48,17 +48,17 @@ namespace SOMIOD_IS.Controllers
         }
 
         [Route("api/somiod")]
-        public HttpResponseMessage Post([FromBody] Application newApp)
+        public HttpResponseMessage Post([FromBody] String newAppName)
         {
             try
             {
-                if (newApp == null)
-                    throw new UnprocessableEntityException("You must provide an application with a name in the correct xml format");
+                /*if (newAppName == null)
+                    throw new UnprocessableEntityException("You must provide an application with a name in the correct xml format");*/
 
-                if (string.IsNullOrEmpty(newApp.Name))
+                if (string.IsNullOrEmpty(newAppName))
                     throw new UnprocessableEntityException("You must include the name of your new application");
 
-                DbHelper.CreateApplication(newApp.Name);
+                DbHelper.CreateApplication(newAppName);
                 return RequestHelper.CreateMessage(Request, "Application created");
             }
             catch (Exception e)
