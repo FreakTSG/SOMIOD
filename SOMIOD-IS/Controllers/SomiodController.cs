@@ -115,12 +115,12 @@ namespace SOMIOD_IS.Controllers
 
         #region Container
 
-        [Route("api/somiod")]
-        public HttpResponseMessage GetContainer()
+        [Route("api/somiod/{application}/containers")]
+        public HttpResponseMessage GetContainers(string application)
         {
             try
             {
-                var containers = DbHelper.GetContainers();
+                var containers = DbHelper.GetContainers(application);
                 return RequestHelper.CreateMessage(Request, containers);
             }
             catch (Exception e)

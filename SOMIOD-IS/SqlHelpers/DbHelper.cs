@@ -11,6 +11,65 @@ namespace SOMIOD_IS.SqlHelpers
     public static class DbHelper
     {
 
+        #region Metodos Genericos
+
+        // Verifies if a child with the given name exists in the parent with the given name,
+        // and if the parent itself exists.
+        // This method should be used in Deletes/Updates, i.e., situations where the child already exists.
+        // Returns the id of the child.
+        private static int IsParentValid(SqlConnection db, string parentType, string parentName, string childType, string childName)
+        {
+            // Parameterized query to prevent SQL injection
+            var query =
+                $"SELECT c.Id FROM {childType} c JOIN {parentType} p ON (c.Parent = p.Id) WHERE p.Name=@ParentName AND c.Name=@ChildName";
+
+            using (var cmd = new SqlCommand(query, db))
+            {
+                cmd.Parameters.AddWithValue("@ParentName", parentName.ToLower());
+                cmd.Parameters.AddWithValue("@ChildName", childName.ToLower());
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        throw new ModelNotFoundException(
+                            $"Couldn't find {childType.ToLower()} '{childName}' in {parentType.ToLower()} '{parentName}'",
+                            false);
+                    }
+
+                    int childId = reader.GetInt32(0);
+                    return childId;
+                }
+            }
+        }
+
+        // Searches for the parent, and if it exists, returns its id.
+        // Performs the existence check for the parent.
+        // This method should be used in Creates where the child does not yet exist and requires the parent's id.
+        private static int GetParentId(SqlConnection db, string parentType, string parentName)
+        {
+            // Parameterized query to prevent SQL injection
+            var query = $"SELECT Id FROM {parentType} WHERE Name=@ParentName";
+
+            using (var cmd = new SqlCommand(query, db))
+            {
+                cmd.Parameters.AddWithValue("@ParentName", parentName.ToLower());
+
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (!reader.Read())
+                    {
+                        throw new ModelNotFoundException($"Couldn't find {parentType.ToLower()} '{parentName}'", false);
+                    }
+
+                    int parentId = reader.GetInt32(0);
+                    return parentId;
+                }
+            }
+        }
+
+        #endregion
+
         #region Application
 
         //Get all applications
@@ -144,7 +203,12 @@ namespace SOMIOD_IS.SqlHelpers
 
         #region Container
 
-        public static List<Container> GetContainers()
+        private static int isContainerParentValid(SqlConnection db, string appName, string moduleName)
+        {
+            return IsParentValid(db, "Application", appName, "Module", moduleName);
+        }
+
+        public static List<Container> GetContainers(string appName)
         {
             List<Container> data = new List<Container>();
 
@@ -152,9 +216,13 @@ namespace SOMIOD_IS.SqlHelpers
             {
                 var db = connection.Open();
 
-                string query = "SELECT * FROM Container";
+                string query = "SELECT * FROM Container c JOIN Application a ON (c.Parent = a.Id) WHERE a.Name=@AppName";
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
+
+
+                    command.Parameters.AddWithValue("@AppName", appName.ToLower());
+
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
@@ -173,15 +241,22 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-        public static Container GetContainer(string containerName)
+        public static Container GetContainer(string appName,string containerName)
         {
             using (var connection = new DbConnection())
             {
                 var db = connection.Open();
-                string query = "SELECT * FROM Container WHERE Name=@Name";
+
+
+                //verifica se o id da app coincide com o parent no container
+                var containerId = isContainerParentValid(db,appName,containerName);
+
+                string query = "SELECT * FROM Container WHERE Id=@Id";
+
+               
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
-                    command.Parameters.AddWithValue("@Name", containerName);
+                    command.Parameters.AddWithValue("@Id", containerId);
 
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
@@ -191,6 +266,8 @@ namespace SOMIOD_IS.SqlHelpers
                             string name = reader.GetString(reader.GetOrdinal("Name"));
                             var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
                             int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
+
+                            //falta aqui a linha que vai buscar a data relativa a este container
 
                             return new Container(id, name, time, parentid);
                         }
