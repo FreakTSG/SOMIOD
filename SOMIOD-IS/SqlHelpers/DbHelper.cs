@@ -137,7 +137,141 @@ namespace SOMIOD_IS.SqlHelpers
         }
 
 
-        #endregion 
+        #endregion
+
+        #region Container
+
+        public static List<Container> GetContainers()
+        {
+            List<Container> data = new List<Container>();
+
+            using (var connection = new DbConnection())
+            {
+                var db = connection.Open();
+
+                string query = "SELECT * FROM Container";
+                using (SqlCommand command = new SqlCommand(query, db))
+                {
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            string name = reader.GetString(reader.GetOrdinal("Name"));
+                            var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
+                            int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
+
+                            data.Add(new Container(id, name, time, parentid));
+                        }
+                        reader.Close();
+                    }
+                }
+                return data;
+            }
+        }
+
+        public static Container GetContainer(string containerName)
+        {
+            using (var connection = new DbConnection())
+            {
+                var db = connection.Open();
+                string query = "SELECT * FROM Container WHERE Name=@Name";
+                using (SqlCommand command = new SqlCommand(query, db))
+                {
+                    command.Parameters.AddWithValue("@Name", containerName);
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            string name = reader.GetString(reader.GetOrdinal("Name"));
+                            var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
+                            int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
+
+                            return new Container(id, name, time, parentid);
+                        }
+                        return null;
+                    }
+                }
+
+            }
+        }
+
+        public static void CreateContainer(string name, int? parentContainerId = null)
+        {
+            using (var connection = new DbConnection())
+            {
+                var db = connection.Open();
+
+                string query = "INSERT INTO Container (Name, CreationDate, Parent) VALUES (@ContainerName, @CreationDate, @Parent); SELECT SCOPE_IDENTITY();";
+                using (SqlCommand command = new SqlCommand(query, db))
+                {
+                    command.Parameters.AddWithValue("@ContainerName", name.ToLower());
+                    command.Parameters.AddWithValue("@CreationDate", DateTime.Now);
+                    if (parentContainerId.HasValue)
+                    {
+                        command.Parameters.AddWithValue("@Parent", parentContainerId.Value);
+                    }
+                    else
+                    {
+                        command.Parameters.AddWithValue("@Parent", DBNull.Value);
+                    }
+
+                    int newContainerId = Convert.ToInt32(command.ExecuteScalar());
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void UpdateContainer(string name, string newName)
+        {
+            using (var connection = new DbConnection())
+            {
+                var db = connection.Open();
+
+                string query = "UPDATE Container SET Name = @NewName WHERE Name = @Name";
+                using (SqlCommand command = new SqlCommand(query, db))
+                {
+                    command.Parameters.AddWithValue("@Name", name.ToLower());
+                    command.Parameters.AddWithValue("@NewName", newName);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static bool DeleteContainer(int containerId)
+        {
+            using (var connection = new DbConnection())
+            {
+                var db = connection.Open();
+
+                string checkQuery = "SELECT COUNT(1) FROM Container WHERE Id = @Id";
+                using (SqlCommand checkCommand = new SqlCommand(checkQuery, db))
+                {
+                    checkCommand.Parameters.AddWithValue("@Id", containerId);
+
+                    int exists = (int)checkCommand.ExecuteScalar();
+                    if (exists == 0)
+                    {
+                        return false;
+                    }
+                }
+ 
+                string deleteQuery = "DELETE FROM Container WHERE Id = @Id";
+                using (SqlCommand deleteCommand = new SqlCommand(deleteQuery, db))
+                {
+                    deleteCommand.Parameters.AddWithValue("@Id", containerId);
+
+                    int rowsAffected = deleteCommand.ExecuteNonQuery();
+                    return rowsAffected > 0; 
+                }
+            }
+        }
+
+        #endregion
 
         private class DbConnection : IDisposable
         {

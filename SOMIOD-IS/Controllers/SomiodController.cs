@@ -7,6 +7,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Web.Http;
 
 namespace SOMIOD_IS.Controllers
@@ -109,7 +110,40 @@ namespace SOMIOD_IS.Controllers
         }
 
         #endregion
+
         //Container
+
+        #region Container
+
+        [Route("api/somiod")]
+        public HttpResponseMessage GetContainer()
+        {
+            try
+            {
+                var containers = DbHelper.GetContainers();
+                return RequestHelper.CreateMessage(Request, containers);
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
+
+        [Route("api/somiod/{container}")]
+        public HttpResponseMessage GetContainer(string container)
+        {
+            try
+            {
+                var cont = DbHelper.GetContainer(container);
+                return RequestHelper.CreateMessage(Request, cont);
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
+
+        #endregion
 
         //Data
 
