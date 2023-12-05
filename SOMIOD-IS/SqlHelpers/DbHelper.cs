@@ -338,7 +338,7 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-        public static void CreateData(string appName, string moduleName, string dataContent)
+        public static void CreateData(string appName, string containerName, string dataContent)
         {
             /*using (var dbConn = new DbConnection())
             using (var db = dbConn.Open())
@@ -346,7 +346,7 @@ namespace SOMIOD_IS.SqlHelpers
             {
                 try
                 {
-                    int parentId = IsContainerParentValid(db, appName, moduleName);
+                    int parentId = IsContainerParentValid(db, appName, containerName);
 
                     var cmdText = "INSERT INTO Data (Content, CreationDate, Parent) VALUES (@Content, @CreationDate, @Parent)";
                     using (var cmd = new SqlCommand(cmdText, db, transaction))
@@ -360,7 +360,7 @@ namespace SOMIOD_IS.SqlHelpers
                         if (rowChng != 1)
                             throw new UntreatedSqlException();
 
-                        NotifySubscriptions(db, parentId, moduleName, "CREATE", dataContent);
+                        NotifySubscriptions(db, parentId, containerName, "CREATE", dataContent);
                     }
 
                     transaction.Commit();
@@ -373,7 +373,7 @@ namespace SOMIOD_IS.SqlHelpers
             }*/
         }
 
-        public static void DeleteData(string appName, string moduleName, int dataId)
+        public static void DeleteData(string appName, string cntainerName, int dataId)
         {
             /*using (var dbConn = new DbConnection())
             using (var db = dbConn.Open())
@@ -381,20 +381,20 @@ namespace SOMIOD_IS.SqlHelpers
             {
                 try
                 {
-                    int parentId = IsContainerParentValid(db, appName, moduleName);
+                    int parentId = IsContainerParentValid(db, appName, containerName);
 
-                    var cmdText = "SELECT m.Id, d.Id, d.Content FROM Module m JOIN Data d ON (d.Parent = m.Id) WHERE d.Id=@DataId AND m.Name=@ModuleName";
+                    var cmdText = "SELECT c.Id, d.Id, d.Content FROM Container c JOIN Data d ON (d.Parent = c.Id) WHERE d.Id=@DataId AND c.Name=@containerName";
                     string dataContent;
 
                     using (var cmd = new SqlCommand(cmdText, db, transaction))
                     {
                         cmd.Parameters.AddWithValue("@DataId", dataId);
-                        cmd.Parameters.AddWithValue("@ModuleName", moduleName.ToLower());
+                        cmd.Parameters.AddWithValue("@containerName", containerName.ToLower());
 
                         using (var reader = cmd.ExecuteReader())
                         {
                             if (!reader.Read())
-                                throw new ModelNotFoundException("A data resource with the Id #" + dataId + " does not exist in the module " + moduleName, false);
+                                throw new ModelNotFoundException("A data resource with the Id #" + dataId + " does not exist in the container " + containerName, false);
 
                             dataContent = reader.GetString(2);
                         }
@@ -408,7 +408,7 @@ namespace SOMIOD_IS.SqlHelpers
                         if (rowChng != 1)
                             throw new UntreatedSqlException();
 
-                        NotifySubscriptions(db, parentId, moduleName, "DELETE", dataContent);
+                        NotifySubscriptions(db, parentId, containerName, "DELETE", dataContent);
                     }
 
                     transaction.Commit();
