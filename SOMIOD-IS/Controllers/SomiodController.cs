@@ -130,16 +130,57 @@ namespace SOMIOD_IS.Controllers
         }
 
         [Route("api/somiod/{container}")]
-        public HttpResponseMessage GetContainer(string container)
+        public HttpResponseMessage GetContainer(string appname,string container)
         {
             try
             {
-                var cont = DbHelper.GetContainer(container);
+                var cont = DbHelper.GetContainer(appname,container);
                 return RequestHelper.CreateMessage(Request, cont);
             }
             catch (Exception e)
             {
                 return RequestHelper.CreateError(Request, e);
+            }
+        }
+
+        [Route("api/somiod/{container}")]
+        public HttpResponseMessage Put(string container, [FromBody] Container newContainerDetails)
+        {
+            try
+            {
+                if (newContainerDetails == null)
+                    throw new UnprocessableEntityException("You must provide an container with a name in the correct xml format");
+
+                if (string.IsNullOrEmpty(newContainerDetails.Name))
+                    throw new UnprocessableEntityException("You must include the updated name of the container");
+
+                string newName = newContainerDetails.Name;
+                DbHelper.UpdateApplication(container, newName);
+                return Request.CreateResponse(HttpStatusCode.OK, "Container updated");
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
+
+        [HttpDelete]
+        [Route("api/somiod/{application}/{id:int}")]
+        public IHttpActionResult DeleteContainer(int id)
+        {
+            try
+            {
+                bool isDeleted = DbHelper.DeleteContainer(id);
+                if (!isDeleted)
+                {
+                    return NotFound(); 
+                }
+
+                return Ok(); 
+            }
+            catch (Exception e)
+            {
+                return InternalServerError(e); 
             }
         }
 
