@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Web.Caching;
 using System.Web.Http;
 
 namespace SOMIOD_IS.Controllers
@@ -22,12 +23,38 @@ namespace SOMIOD_IS.Controllers
         [Route("api/somiod")]
         public HttpResponseMessage GetApplications()
         {
-            try
+            try { 
+            if (Request.Headers.Contains("somiod-discover"))
             {
-                var applications = DbHelper.GetApplications();
-                return RequestHelper.CreateMessage(Request, applications);
+                // Get the values of the "somiod-discover" header
+                IEnumerable<string> headerValues = Request.Headers.GetValues("somiod-discover");
+
+                // Assuming you only expect one value for the header, you can retrieve it like this
+                string discoverHeaderValue = headerValues.FirstOrDefault();
+
+                if(discoverHeaderValue == "application") { 
+
+                try
+                {
+                    var applications = DbHelper.GetApplications();
+                    return RequestHelper.CreateMessage(Request, applications);
+                }
+                catch (Exception e)
+                {
+                    return RequestHelper.CreateError(Request, e);
+                }
+                }
+                else
+                {
+                    throw new UnprocessableEntityException("Header esta a vazio ou errado");
+                }
             }
-            catch (Exception e)
+            else
+            {
+                throw new UnprocessableEntityException("Header em falta ou errado");
+            }
+
+            }catch  (Exception e)
             {
                 return RequestHelper.CreateError(Request, e);
             }
@@ -90,12 +117,12 @@ namespace SOMIOD_IS.Controllers
 
         // DELETE: application
         [HttpDelete]
-        [Route("api/somiod/{id:int}")]
-        public IHttpActionResult DeleteApplication(int id)
+        [Route("api/somiod/{application}")]
+        public IHttpActionResult DeleteApplication(string application)
         {
             try
             {
-                bool isDeleted = DbHelper.DeleteApplication(id);
+                bool isDeleted = DbHelper.DeleteApplication(application);
                 if (!isDeleted)
                 {
                     return NotFound(); // Return 404 if the application doesn't exist
@@ -129,7 +156,7 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
-        [Route("api/somiod/{container}")]
+        [Route("api/somiod/{application}/{container}")]
         public HttpResponseMessage GetContainer(string appname,string container)
         {
             try
@@ -143,7 +170,7 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
-        [Route("api/somiod/{container}")]
+        [Route("api/somiod/{application}/{container}")]
         public HttpResponseMessage Put(string container, [FromBody] Container newContainerDetails)
         {
             try
