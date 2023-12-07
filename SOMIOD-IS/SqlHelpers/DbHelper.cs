@@ -169,31 +169,40 @@ namespace SOMIOD_IS.SqlHelpers
         }
 
 
-        public static bool DeleteApplication(int id)
+        public static bool DeleteApplication(string name)
         {
             using (var connection = new DbConnection())
             {
                 var db = connection.Open();
 
+
                 // Check if the application exists
-                string checkQuery = "SELECT COUNT(1) FROM Application WHERE Id = @Id";
+                string checkQuery = "SELECT * FROM Container c JOIN Application a ON (c.Parent = a.Id) WHERE a.Name=@Name";
                 using (SqlCommand checkCommand = new SqlCommand(checkQuery, db))
                 {
-                    checkCommand.Parameters.AddWithValue("@Id", id);
-                    int exists = (int)checkCommand.ExecuteScalar();
-                    if (exists == 0)
+                    checkCommand.Parameters.AddWithValue("@Name", name.ToLower());
+                    var reader = checkCommand.ExecuteReader();
+
+                    if (reader.Read())
                     {
-                        return false; // No application found with the given ID
+                        throw new Exception("Can not delete an application with containers");
                     }
+
+                    reader.Close();
+
+                    
                 }
 
                 // Delete the application
-                string deleteQuery = "DELETE FROM Application WHERE Id = @Id";
+                string deleteQuery = "DELETE FROM Application WHERE Name = @Name";
                 using (SqlCommand deleteCommand = new SqlCommand(deleteQuery, db))
                 {
-                    deleteCommand.Parameters.AddWithValue("@Id", id);
+                    deleteCommand.Parameters.AddWithValue("@Name", name.ToLower());
                     int rowsAffected = deleteCommand.ExecuteNonQuery();
-                    return rowsAffected > 0; // Returns true if the application was deleted
+                    if (rowsAffected != 1)
+                        throw new ModelNotFoundException("Application");
+
+                    return true;
                 }
             }
         }
@@ -278,27 +287,20 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-        public static void CreateContainer(string name, int? parentContainerId = null)
+        public static void CreateContainer(string containername, string appName)
         {
             using (var connection = new DbConnection())
             {
                 var db = connection.Open();
 
+                int parentID = GetParentId(db, "Application", appName);
+
                 string query = "INSERT INTO Container (Name, CreationDate, Parent) VALUES (@ContainerName, @CreationDate, @Parent); SELECT SCOPE_IDENTITY();";
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
-                    command.Parameters.AddWithValue("@ContainerName", name.ToLower());
+                    command.Parameters.AddWithValue("@Name", containername.ToLower());
                     command.Parameters.AddWithValue("@CreationDate", DateTime.Now);
-                    if (parentContainerId.HasValue)
-                    {
-                        command.Parameters.AddWithValue("@Parent", parentContainerId.Value);
-                    }
-                    else
-                    {
-                        command.Parameters.AddWithValue("@Parent", DBNull.Value);
-                    }
-
-                    int newContainerId = Convert.ToInt32(command.ExecuteScalar());
+                    command.Parameters.AddWithValue("@Parent", parentID);
 
                     command.ExecuteNonQuery();
                 }
