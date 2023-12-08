@@ -216,6 +216,45 @@ namespace SOMIOD_IS.Controllers
         #region Data
         //Data
 
+        [Route("api/somiod/{application}/{container}/data")]
+        public HttpResponseMessage PostData(string application, string container, [FromBody]Data newData)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
+            }
+            try
+            {
+                if(newData == null)
+                    throw new UnprocessableEntityException("You must provide an data with a name in the correct xml format");
+                if(string.IsNullOrEmpty(newData.Content))
+                    throw new UnprocessableEntityException("You must include content for that data resource");
+                DbHelper.CreateData(application, container, newData.Content);
+                return RequestHelper.CreateMessage(Request, "Data created");
+            }
+            catch (Exception e)
+            {
+                if(e is BrokerException)
+                    return RequestHelper.CreateMessage(Request,"Data resource was created but could not notify at least one of the subscribers Error:" +e.Message);
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
+
+        [Route("api/somiod/{application}/{container}/data/{dataId}")]
+        public HttpResponseMessage DeleteData(string application, string container, int dataId)
+        {
+            try
+            {
+                DbHelper.DeleteData(application, container, dataId);
+                return RequestHelper.CreateMessage(Request, "Data resource was deleted");
+            }
+            catch (Exception e)
+            {
+                if(e is BrokerException)
+                    return RequestHelper.CreateMessage(Request, "Data resource was deleted but could not notify at least one of the subscribers Error:" + e.Message);
+                return RequestHelper.CreateError(Request, e);
+            }
+        }   
 
 
         #endregion

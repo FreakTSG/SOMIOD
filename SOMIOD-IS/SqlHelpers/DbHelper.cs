@@ -212,9 +212,9 @@ namespace SOMIOD_IS.SqlHelpers
 
         #region Container
 
-        private static int isContainerParentValid(SqlConnection db, string appName, string moduleName)
+        private static int IsContainerParentValid(SqlConnection db, string appName, string ContainerName)
         {
-            return IsParentValid(db, "Application", appName, "Module", moduleName);
+            return IsParentValid(db, "Application", appName, "Container", ContainerName);
         }
 
         public static List<Container> GetContainers(string appName)
@@ -258,7 +258,7 @@ namespace SOMIOD_IS.SqlHelpers
 
 
                 //verifica se o id da app coincide com o parent no container
-                var containerId = isContainerParentValid(db,appName,containerName);
+                var containerId = IsContainerParentValid(db,appName,containerName);
 
                 string query = "SELECT * FROM Container WHERE Id=@Id";
 
@@ -357,7 +357,7 @@ namespace SOMIOD_IS.SqlHelpers
 
         #region Data
 
-        private static List<Data> GetDataResourcesForModule(int parentId)
+        private static List<Data> GetDataResourcesForContainer(int parentId)
         {
             var dataRes = new List<Data>();
 
@@ -375,7 +375,7 @@ namespace SOMIOD_IS.SqlHelpers
                         {
                             while (reader.Read())
                             {
-                                dataRes.Add(new Data(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), reader.GetInt32(3)));
+                                dataRes.Add(new Data(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), reader.GetInt32(4)));
                             }
                         }
                     }
@@ -390,7 +390,7 @@ namespace SOMIOD_IS.SqlHelpers
             return dataRes;
         }
 
-        private static void NotifySubscriptions(SqlConnection db, int parentId, string moduleName, string eventType, string data)
+        private static void NotifySubscriptions(SqlConnection db, int parentId, string containerName, string eventType, string data)
         {
             try
             {
@@ -406,7 +406,7 @@ namespace SOMIOD_IS.SqlHelpers
                     {
                         while (reader.Read())
                         {
-                            BrokerHelper.FireNotification(reader.GetString(5), moduleName, notification);
+                            BrokerHelper.FireNotification(reader.GetString(5), containerName, notification);
                         }
                     }
                 }
@@ -419,7 +419,7 @@ namespace SOMIOD_IS.SqlHelpers
 
         public static void CreateData(string appName, string containerName, string dataContent)
         {
-            /*using (var dbConn = new DbConnection())
+            using (var dbConn = new DbConnection())
             using (var db = dbConn.Open())
             using (var transaction = db.BeginTransaction())
             {
@@ -427,9 +427,10 @@ namespace SOMIOD_IS.SqlHelpers
                 {
                     int parentId = IsContainerParentValid(db, appName, containerName);
 
-                    var cmdText = "INSERT INTO Data (Content, CreationDate, Parent) VALUES (@Content, @CreationDate, @Parent)";
+                    var cmdText = "INSERT INTO Data (Name, Content, CreationDate, Parent) VALUES (@Name, @Content, @CreationDate, @Parent)";
                     using (var cmd = new SqlCommand(cmdText, db, transaction))
                     {
+                        cmd.Parameters.AddWithValue("@Name", containerName.ToLower());
                         cmd.Parameters.AddWithValue("@Content", dataContent);
                         cmd.Parameters.AddWithValue("@CreationDate", DateTime.Now);
                         cmd.Parameters.AddWithValue("@Parent", parentId);
@@ -449,12 +450,12 @@ namespace SOMIOD_IS.SqlHelpers
                     transaction.Rollback();
                     throw new UntreatedSqlException();
                 }
-            }*/
+            }
         }
 
-        public static void DeleteData(string appName, string cntainerName, int dataId)
+        public static void DeleteData(string appName, string containerName, int dataId)
         {
-            /*using (var dbConn = new DbConnection())
+            using (var dbConn = new DbConnection())
             using (var db = dbConn.Open())
             using (var transaction = db.BeginTransaction())
             {
@@ -497,7 +498,7 @@ namespace SOMIOD_IS.SqlHelpers
                     transaction.Rollback();
                     throw;
                 }
-            }*/
+            }
         }
 
 
