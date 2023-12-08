@@ -115,6 +115,7 @@
     <Compile Include="SqlHelpers\ModelNotFoundException.cs" />
     <Compile Include="SqlHelpers\Notification.cs" />
     <Compile Include="SqlHelpers\RequestHelper.cs" />
+    <Compile Include="SqlHelpers\UntreatedSqlException.cs" />
     <Compile Include="SqlHelpers\XmlHelper.cs" />
   </ItemGroup>
   <ItemGroup>
