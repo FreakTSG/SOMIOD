@@ -9,6 +9,7 @@ using SOMIOD_IS.Controllers;
 using System.ComponentModel;
 using System.Data.Common;
 using System.Reflection;
+using Container = SOMIOD_IS.Models.Container;
 
 namespace SOMIOD_IS.SqlHelpers
 {
@@ -233,9 +234,9 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-        public static List<Models.Container> GetContainers(string appName)
+        public static List<Container> GetContainers(string appName)
         {
-            var container = new List<Models.Container>();
+            var container = new List<Container>();
 
             using (var connection = new DbConnection())
             {
@@ -266,7 +267,7 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-        public static Models.Container GetContainer(string appName,string containerName)
+        public static Container GetContainer(string appName,string containerName)
         {
             using (var connection = new DbConnection())
             {
