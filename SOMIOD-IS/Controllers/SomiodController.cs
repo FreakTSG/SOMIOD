@@ -16,6 +16,7 @@ namespace SOMIOD_IS.Controllers
 
     public class SomiodController : ApiController
     {
+        private readonly List<string> _validEvents = new List<string>() { "CREATE", "DELETE", "BOTH" };
 
 
         #region application
@@ -191,23 +192,17 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
-        [HttpDelete]
-        [Route("api/somiod/{application}/{id:int}")]
-        public IHttpActionResult DeleteContainer(int id)
+        [Route("api/somiod/{application}/{container}")]
+        public HttpResponseMessage DeleteContainer(string application, string container)
         {
             try
             {
-                bool isDeleted = DbHelper.DeleteContainer(id);
-                if (!isDeleted)
-                {
-                    return NotFound(); 
-                }
-
-                return Ok(); 
+                DbHelper.DeleteContainer(application, container);
+                return Request.CreateResponse(HttpStatusCode.OK, "Container was deleted");
             }
             catch (Exception e)
             {
-                return InternalServerError(e); 
+                return RequestHelper.CreateError(Request, e);
             }
         }
 
@@ -254,13 +249,52 @@ namespace SOMIOD_IS.Controllers
                     return RequestHelper.CreateMessage(Request, "Data resource was deleted but could not notify at least one of the subscribers Error:" + e.Message);
                 return RequestHelper.CreateError(Request, e);
             }
-        }   
+        }
 
 
         #endregion
 
         #region Subscription
-        //Subscription
+
+        [Route("api/somiod/{application}/{container}/subscriptions")]
+        public HttpResponseMessage PostSubscription(string application, string container, [FromBody] Subscription newSubscription)
+        {
+            try
+            {
+                if (newSubscription == null)
+                    throw new UnprocessableEntityException("You must provide a subscription with a valid url in the correct xml format");
+
+                if (string.IsNullOrEmpty(newSubscription.Name))
+                    throw new UnprocessableEntityException("You must include a name for that subscription");
+
+                if (string.IsNullOrEmpty(newSubscription.Endpoint))
+                    throw new UnprocessableEntityException("You must include an endpoint for that subscription");
+
+                if (!_validEvents.Contains(newSubscription.Event.ToUpper()))
+                    throw new UnprocessableEntityException("You must include a valid event for that subscription. Valid event types are: CREATE, DELETE, BOTH");
+
+                DbHelper.CreateSubscription(application, container, newSubscription);
+                return RequestHelper.CreateMessage(Request, "Subscription created");
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
+
+        [Route("api/somiod/{application}/{container}/subscriptions/{subscription}")]
+        public HttpResponseMessage DeleteSubscription(string application, string container, string subscription)
+        {
+            try
+            {
+                DbHelper.DeleteSubscription(application, container, subscription);
+                return Request.CreateResponse(HttpStatusCode.OK, "Subscription was deleted");
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
 
         #endregion
 
