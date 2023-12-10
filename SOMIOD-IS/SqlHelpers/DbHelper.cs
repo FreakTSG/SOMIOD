@@ -5,6 +5,10 @@ using System.Web;
 using System.Data.SqlClient;
 using SOMIOD_IS.Models;
 using SOMIOD_IS.Properties;
+using SOMIOD_IS.Controllers;
+using System.ComponentModel;
+using System.Data.Common;
+using System.Reflection;
 
 namespace SOMIOD_IS.SqlHelpers
 {
@@ -217,9 +221,21 @@ namespace SOMIOD_IS.SqlHelpers
             return IsParentValid(db, "Application", appName, "Container", ContainerName);
         }
 
-        public static List<Container> GetContainers(string appName)
+        private static void ProcessSqlExceptionContainer(SqlException e)
         {
-            List<Container> data = new List<Container>();
+            switch (e.Number)
+            {
+                // Cannot insert duplicate key in object
+                case 2627:
+                    throw new UnprocessableEntityException("A container with that name already exists in that application");
+                default:
+                    throw new UntreatedSqlException(e);
+            }
+        }
+
+        public static List<Models.Container> GetContainers(string appName)
+        {
+            var container = new List<Models.Container>();
 
             using (var connection = new DbConnection())
             {
@@ -241,16 +257,16 @@ namespace SOMIOD_IS.SqlHelpers
                             var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
                             int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
 
-                            data.Add(new Container(id, name, time, parentid));
+                            container.Add(new Models.Container(id, name, time, parentid));
                         }
                         reader.Close();
                     }
                 }
-                return data;
+                return container;
             }
         }
 
-        public static Container GetContainer(string appName,string containerName)
+        public static Models.Container GetContainer(string appName,string containerName)
         {
             using (var connection = new DbConnection())
             {
@@ -278,7 +294,7 @@ namespace SOMIOD_IS.SqlHelpers
 
                             //falta aqui a linha que vai buscar a data relativa a este container
 
-                            return new Container(id, name, time, parentid);
+                            return new Models.Container(id, name, time, parentid);
                         }
                         return null;
                     }
@@ -302,56 +318,120 @@ namespace SOMIOD_IS.SqlHelpers
                     command.Parameters.AddWithValue("@CreationDate", DateTime.Now);
                     command.Parameters.AddWithValue("@Parent", parentID);
 
-                    command.ExecuteNonQuery();
+                    try
+                    {
+                        int rowChng = command.ExecuteNonQuery();
+
+                        if (rowChng != 1)
+                            throw new UntreatedSqlException();
+                    }
+                    catch (SqlException e)
+                    {
+                        ProcessSqlExceptionContainer(e);
+                    }
                 }
             }
         }
 
-        public static void UpdateContainer(string name, string newName)
+        public static void UpdateContainer(string appName, string containerName, string newName)
         {
             using (var connection = new DbConnection())
             {
                 var db = connection.Open();
+
+                IsContainerParentValid(db, appName, containerName);
 
                 string query = "UPDATE Container SET Name = @NewName WHERE Name = @Name";
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
-                    command.Parameters.AddWithValue("@Name", name.ToLower());
+                    command.Parameters.AddWithValue("@Name", containerName.ToLower());
                     command.Parameters.AddWithValue("@NewName", newName);
 
-                    command.ExecuteNonQuery();
+                    try
+                    {
+                        int rowChng = command.ExecuteNonQuery();
+
+                        if (rowChng != 1)
+                            throw new ModelNotFoundException("Container");
+                    }
+                    catch (SqlException e)
+                    {
+                        ProcessSqlExceptionContainer(e);
+                    }
                 }
             }
         }
 
-        public static bool DeleteContainer(int containerId)
+        public static bool DeleteContainer(string appName, string containerName)
         {
+            List<int> subsIds = new List<int>();
+            List<int> dataIds = new List<int>();
+
             using (var connection = new DbConnection())
             {
                 var db = connection.Open();
 
-                string checkQuery = "SELECT COUNT(1) FROM Container WHERE Id = @Id";
+                IsContainerParentValid(db, appName, containerName);
+
+                string checkQuery = "SELECT s.Id FROM Container m JOIN Subscription s ON (m.Id = s.Parent) WHERE m.Name=@Name";
                 using (SqlCommand checkCommand = new SqlCommand(checkQuery, db))
                 {
-                    checkCommand.Parameters.AddWithValue("@Id", containerId);
+                    checkCommand.Parameters.AddWithValue("@Name", containerName.ToLower());
+                    var reader = checkCommand.ExecuteReader();
 
-                    int exists = (int)checkCommand.ExecuteScalar();
-                    if (exists == 0)
+                    while (reader.Read())
+                        subsIds.Add(reader.GetInt32(0));
+
+                    reader.Close();
+                }
+
+                checkQuery = "SELECT d.Id FROM Container m JOIN Data d ON (m.Id = d.Parent) WHERE m.Name=@Name";
+                using (SqlCommand checkCommand = new SqlCommand(checkQuery, db))
+                {
+                    checkCommand.Parameters.AddWithValue("@Name", containerName.ToLower());
+                    var reader = checkCommand.ExecuteReader();
+
+                    while (reader.Read())
+                        dataIds.Add(reader.GetInt32(0));
+
+                    reader.Close();
+                }
+
+                foreach (int id in subsIds)
+                {
+                    string deleteQuery = "DELETE FROM Subscription WHERE Id=@Id";
+                    using (SqlCommand deleteCommand = new SqlCommand(deleteQuery, db))
                     {
-                        return false;
+                        deleteCommand.Parameters.AddWithValue("@Id", id);
+
+                        int rowsAffected = deleteCommand.ExecuteNonQuery();
+                        
                     }
                 }
- 
-                string deleteQuery = "DELETE FROM Container WHERE Id = @Id";
-                using (SqlCommand deleteCommand = new SqlCommand(deleteQuery, db))
+
+                foreach (int id in dataIds)
                 {
-                    deleteCommand.Parameters.AddWithValue("@Id", containerId);
+                    string deleteQuery = "DELETE FROM Data WHERE Id=@Id";
+                    using (SqlCommand deleteCommand = new SqlCommand(deleteQuery, db))
+                    {
+                        deleteCommand.Parameters.AddWithValue("@Id", id);
+
+                        int rowsAffected = deleteCommand.ExecuteNonQuery();
+                        
+                    }
+                }
+
+                string deleteQueryContainer = "DELETE FROM Container WHERE Name=@Name";
+                using (SqlCommand deleteCommand = new SqlCommand(deleteQueryContainer, db))
+                {
+                    deleteCommand.Parameters.AddWithValue("@Name", containerName);
 
                     int rowsAffected = deleteCommand.ExecuteNonQuery();
-                    return rowsAffected > 0; 
+                    return rowsAffected > 0;
                 }
             }
         }
+    
 
         #endregion
 
@@ -501,15 +581,72 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-
-
-
-
         #endregion
 
         #region Subscription
 
+        private static void ProcessSqlExceptionSubscription(SqlException e)
+        {
+            switch (e.Number)
+            {
+                // Cannot insert duplicate key in object
+                case 2627:
+                    throw new UnprocessableEntityException("A subscription with that name already exists in that container");
+                default:
+                    throw new UntreatedSqlException(e);
+            }
+        }
 
+        public static void CreateSubscription(string appName, string containerName, Subscription subscription)
+        {
+            using (var dbConn = new DbConnection())
+            {
+                var db = dbConn.Open();
+
+                int parentId = IsContainerParentValid(db, appName, containerName);
+
+                var cmd = new SqlCommand(
+                    "INSERT INTO Subscription (Name, CreationDate, Parent, Event, Endpoint) VALUES (@Name, @CreationDate, @Parent, @Event, @Endpoint)",
+                    db);
+                cmd.Parameters.AddWithValue("@Name", subscription.Name.ToLower());
+                cmd.Parameters.AddWithValue("@CreationDate", DateTime.Now);
+                cmd.Parameters.AddWithValue("@Parent", parentId);
+                cmd.Parameters.AddWithValue("@Event", subscription.Event.ToUpper());
+                cmd.Parameters.AddWithValue("@Endpoint", subscription.Endpoint.ToLower());
+
+                try
+                {
+                    int rowChng = cmd.ExecuteNonQuery();
+
+                    if (rowChng != 1)
+                        throw new UntreatedSqlException();
+                }
+                catch (SqlException e)
+                {
+                    ProcessSqlExceptionSubscription(e);
+                }
+            }
+        }
+
+        public static void DeleteSubscription(string appName, string containerName, string subscriptionName)
+        {
+            using (var dbConn = new DbConnection())
+            {
+                var db = dbConn.Open();
+
+                IsContainerParentValid(db, appName, containerName);
+
+                int parentId = GetParentId(db, "Container", containerName);
+
+                var cmd = new SqlCommand("DELETE FROM Subscription WHERE Name=@Name AND Parent=@Parent", db);
+                cmd.Parameters.AddWithValue("@Name", subscriptionName.ToLower());
+                cmd.Parameters.AddWithValue("@Parent", parentId);
+                int rowChng = cmd.ExecuteNonQuery();
+
+                if (rowChng != 1)
+                    throw new ModelNotFoundException("Subscription");
+            }
+        }
 
         #endregion
 
@@ -533,11 +670,9 @@ namespace SOMIOD_IS.SqlHelpers
             {
                 _conn.Close();
             }
-
             
         }
 
     }
-
 
 }
