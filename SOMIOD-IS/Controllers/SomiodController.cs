@@ -19,8 +19,11 @@ namespace SOMIOD_IS.Controllers
         private readonly List<string> _validEvents = new List<string>() { "CREATE", "DELETE", "BOTH" };
 
 
+
         #region application
         // GETAll: application
+
+        [HttpGet]
         [Route("api/somiod")]
         public HttpResponseMessage GetApplications()
         {
@@ -61,6 +64,8 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
+
+        [HttpGet]
         [Route("api/somiod/{application}")]
         public HttpResponseMessage GetApplication(string application)
         {
@@ -75,6 +80,8 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
+
+        [HttpPost]
         [Route("api/somiod")]
         public HttpResponseMessage Post([FromBody] Application newApp)
         {
@@ -95,8 +102,10 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
+
+        [HttpPut]
         [Route("api/somiod/{application}")]
-        public HttpResponseMessage Put(string application, [FromBody] Application newAppDetails)
+        public HttpResponseMessage Put(string application,[FromBody] Application newAppDetails)
         {
             try
             {
@@ -143,6 +152,8 @@ namespace SOMIOD_IS.Controllers
 
         #region Container
 
+
+        [HttpGet]
         [Route("api/somiod/{application}/containers")]
         public HttpResponseMessage GetContainers(string application)
         {
@@ -157,12 +168,13 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
+        [HttpGet]
         [Route("api/somiod/{application}/{container}")]
-        public HttpResponseMessage GetContainer(string appname,string container)
+        public HttpResponseMessage GetContainer(string application,string container)
         {
             try
             {
-                var cont = DbHelper.GetContainer(appname,container);
+                var cont = DbHelper.GetContainer(application, container);
                 return RequestHelper.CreateMessage(Request, cont);
             }
             catch (Exception e)
@@ -171,8 +183,30 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("api/somiod/{application}")]
+        public HttpResponseMessage PostContainer(string application, [FromBody] Container container)
+        {
+            try
+            {
+                if (container == null)
+                    throw new UnprocessableEntityException("You must provide a container with a name in the correct xml format");
+
+                if (string.IsNullOrEmpty(container.Name))
+                    throw new UnprocessableEntityException("You must include the name of your new container");
+
+                DbHelper.CreateContainer(container.Name, application );
+                return RequestHelper.CreateMessage(Request, "Container created");
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
+
+        [HttpPut]
         [Route("api/somiod/{application}/{container}")]
-        public HttpResponseMessage Put(string container, [FromBody] Container newContainerDetails)
+        public HttpResponseMessage Put(string application,string container, [FromBody] Container newContainerDetails)
         {
             try
             {
@@ -183,7 +217,7 @@ namespace SOMIOD_IS.Controllers
                     throw new UnprocessableEntityException("You must include the updated name of the container");
 
                 string newName = newContainerDetails.Name;
-                DbHelper.UpdateApplication(container, newName);
+                DbHelper.UpdateContainer(application, container, newName);
                 return Request.CreateResponse(HttpStatusCode.OK, "Container updated");
             }
             catch (Exception e)
@@ -192,6 +226,7 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
+        [HttpDelete]
         [Route("api/somiod/{application}/{container}")]
         public HttpResponseMessage DeleteContainer(string application, string container)
         {

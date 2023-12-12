@@ -64,7 +64,7 @@ namespace SOMIOD_IS.SqlHelpers
                 {
                     if (!reader.Read())
                     {
-                        throw new ModelNotFoundException($"Couldn't find {parentType.ToLower()} '{parentName}'", false);
+                        throw new ModelNotFoundException($"Couldn't find {parentType.ToLower()} e '{parentName}'", false);
                     }
 
                     int parentId = reader.GetInt32(0);
@@ -165,7 +165,7 @@ namespace SOMIOD_IS.SqlHelpers
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
                     command.Parameters.AddWithValue("@Name", name.ToLower());
-                    command.Parameters.AddWithValue("@NewName", newName);
+                    command.Parameters.AddWithValue("@NewName", newName.ToLower());
                     
 
                     command.ExecuteNonQuery();
@@ -312,7 +312,7 @@ namespace SOMIOD_IS.SqlHelpers
 
                 int parentID = GetParentId(db, "Application", appName);
 
-                string query = "INSERT INTO Container (Name, CreationDate, Parent) VALUES (@ContainerName, @CreationDate, @Parent); SELECT SCOPE_IDENTITY();";
+                string query = "INSERT INTO Container (Name, CreationDate, Parent) VALUES (@Name, @CreationDate, @Parent); SELECT SCOPE_IDENTITY();";
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
                     command.Parameters.AddWithValue("@Name", containername.ToLower());
@@ -328,6 +328,7 @@ namespace SOMIOD_IS.SqlHelpers
                     }
                     catch (SqlException e)
                     {
+
                         ProcessSqlExceptionContainer(e);
                     }
                 }
