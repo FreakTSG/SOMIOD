@@ -297,7 +297,10 @@ namespace SOMIOD_IS.SqlHelpers
 
                             return new Models.Container(id, name, time, parentid);
                         }
-                        return null;
+                        else
+                        {
+                            throw new UntreatedSqlException();
+                        }
                     }
                 }
 
@@ -312,7 +315,7 @@ namespace SOMIOD_IS.SqlHelpers
 
                 int parentID = GetParentId(db, "Application", appName);
 
-                string query = "INSERT INTO Container (Name, CreationDate, Parent) VALUES (@Name, @CreationDate, @Parent); SELECT SCOPE_IDENTITY();";
+                string query = "INSERT INTO Container (Name, CreationDate, Parent) VALUES (@Name, @CreationDate, @Parent);";
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
                     command.Parameters.AddWithValue("@Name", containername.ToLower());

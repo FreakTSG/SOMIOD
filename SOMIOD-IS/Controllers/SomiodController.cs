@@ -286,7 +286,7 @@ namespace SOMIOD_IS.Controllers
                     // Assuming you only expect one value for the header, you can retrieve it like this
                     string discoverHeaderValue = headerValues.FirstOrDefault();
 
-                    if (discoverHeaderValue == "datas")
+                    if (discoverHeaderValue == "data")
                     {
                         try
                         {
@@ -388,7 +388,7 @@ namespace SOMIOD_IS.Controllers
                     // Assuming you only expect one value for the header, you can retrieve it like this
                     string discoverHeaderValue = headerValues.FirstOrDefault();
 
-                    if (discoverHeaderValue == "subs")
+                    if (discoverHeaderValue == "sub")
                     {
                         try
                         {
