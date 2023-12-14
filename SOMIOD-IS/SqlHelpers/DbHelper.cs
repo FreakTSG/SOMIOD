@@ -499,6 +499,74 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
+        public static List<Data> GetDatas(string appName, string containerName)
+        {
+            var datas = new List<Data>();
+
+            using (var connection = new DbConnection())
+            {
+                var db = connection.Open();
+
+                int parentId = IsContainerParentValid(db, appName, containerName);
+
+                string query = "SELECT * FROM Data d JOIN Container c ON (d.Parent = c.Id) WHERE c.Name=@containerName";
+
+                using (SqlCommand command = new SqlCommand(query, db))
+                {
+                    command.Parameters.AddWithValue("@Parent", parentId);
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            string name = reader.GetString(reader.GetOrdinal("Name"));
+                            string content = reader.GetString(reader.GetOrdinal("Content"));
+                            DateTime creationdate = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
+                            int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
+
+                            datas.Add(new Data(id, name, content, creationdate, parentid));
+                        }
+                        reader.Close();
+                    }
+                }
+                return datas;
+            }
+        }
+
+        public static Data GetData(string appName, string containerName, string dataName)
+        {
+            using (var connection = new DbConnection())
+            {
+                var db = connection.Open();
+
+                int parentId = IsContainerParentValid(db, appName, containerName);
+
+                string query = "SELECT * FROM Data WHERE Id=@Id";
+
+                using (SqlCommand command = new SqlCommand(query, db))
+                {
+                    command.Parameters.AddWithValue("@Parent", parentId);
+                    command.Parameters.AddWithValue("@Name", dataName.ToLower());
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            string name = reader.GetString(reader.GetOrdinal("Name"));
+                            string content = reader.GetString(reader.GetOrdinal("Content"));
+                            DateTime creationdate = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
+                            int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
+
+                            return new Data(id, name, content, creationdate, parentid);
+                        }
+                        return null;
+                    }
+                }
+            }
+        }
+
         public static void CreateData(string appName, string containerName, string dataContent)
         {
             using (var dbConn = new DbConnection())

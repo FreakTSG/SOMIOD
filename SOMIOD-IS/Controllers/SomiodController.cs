@@ -271,8 +271,64 @@ namespace SOMIOD_IS.Controllers
         #endregion
 
         #region Data
-        //Data
-      
+
+        [HttpGet]
+        [Route("api/somiod/{application}/{container}/data")]
+        public HttpResponseMessage GetDatas(string application, string container)
+        {
+            try
+            {
+                if (Request.Headers.Contains("somiod-discover"))
+                {
+                    // Get the values of the "somiod-discover" header
+                    IEnumerable<string> headerValues = Request.Headers.GetValues("somiod-discover");
+
+                    // Assuming you only expect one value for the header, you can retrieve it like this
+                    string discoverHeaderValue = headerValues.FirstOrDefault();
+
+                    if (discoverHeaderValue == "datas")
+                    {
+                        try
+                        {
+                            var datas = DbHelper.GetSubscriptions(application, container);
+                            return RequestHelper.CreateMessage(Request, datas);
+                        }
+                        catch (Exception e)
+                        {
+                            return RequestHelper.CreateError(Request, e);
+                        }
+                    }
+                    else
+                    {
+                        throw new UnprocessableEntityException("Header esta a vazio ou errado");
+                    }
+                }
+                else
+                {
+                    throw new UnprocessableEntityException("Header em falta ou errado");
+                }
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
+
+        [HttpGet]
+        [Route("api/somiod/{application}/{container}/data/{dataName}")]
+        public HttpResponseMessage GetData(string application, string container, string dataName)
+        {
+            try
+            {
+                var datas = DbHelper.GetData(application, container, dataName);
+                return RequestHelper.CreateMessage(Request, datas);
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
+
         [Route("api/somiod/{application}/{container}/data")]
         public HttpResponseMessage PostData(string application, string container, [FromBody]Data newData)
         {
