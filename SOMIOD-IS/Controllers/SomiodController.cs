@@ -272,7 +272,7 @@ namespace SOMIOD_IS.Controllers
 
         #region Data
         //Data
-
+      
         [Route("api/somiod/{application}/{container}/data")]
         public HttpResponseMessage PostData(string application, string container, [FromBody]Data newData)
         {
@@ -318,7 +318,7 @@ namespace SOMIOD_IS.Controllers
 
         #region Subscription
 
-        [Route("api/somiod/{application}/{container}/subscriptions")]
+        [Route("api/somiod/{application}/{container}/sub")]
         public HttpResponseMessage PostSubscription(string application, string container, [FromBody] Subscription newSubscription)
         {
             try
@@ -344,7 +344,7 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
-        [Route("api/somiod/{application}/{container}/subscriptions/{subscription}")]
+        [Route("api/somiod/{application}/{container}/sub/{subscription}")]
         public HttpResponseMessage DeleteSubscription(string application, string container, string subscription)
         {
             try
