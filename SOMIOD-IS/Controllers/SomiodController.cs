@@ -159,8 +159,35 @@ namespace SOMIOD_IS.Controllers
         {
             try
             {
-                var containers = DbHelper.GetContainers(application);
-                return RequestHelper.CreateMessage(Request, containers);
+                if (Request.Headers.Contains("somiod-discover"))
+                {
+                    // Get the values of the "somiod-discover" header
+                    IEnumerable<string> headerValues = Request.Headers.GetValues("somiod-discover");
+
+                    // Assuming you only expect one value for the header, you can retrieve it like this
+                    string discoverHeaderValue = headerValues.FirstOrDefault();
+
+                    if (discoverHeaderValue == "container")
+                    {
+                        try
+                        {
+                            var containers = DbHelper.GetContainers(application);
+                            return RequestHelper.CreateMessage(Request, containers);
+                        }
+                        catch (Exception e)
+                        {
+                            return RequestHelper.CreateError(Request, e);
+                        }
+                    }
+                    else
+                    {
+                        throw new UnprocessableEntityException("Header esta a vazio ou errado");
+                    }
+                }
+                else
+                {
+                    throw new UnprocessableEntityException("Header em falta ou errado");
+                }
             }
             catch (Exception e)
             {
