@@ -297,7 +297,7 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
-        [Route("api/somiod/{application}/{container}/data/{dataId}")]
+        [Route("api/somiod/{application}/{container}/data/{dataName}")]
         public HttpResponseMessage DeleteData(string application, string container, string dataName)
         {
             try
