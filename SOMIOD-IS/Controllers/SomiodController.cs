@@ -298,11 +298,11 @@ namespace SOMIOD_IS.Controllers
         }
 
         [Route("api/somiod/{application}/{container}/data/{dataId}")]
-        public HttpResponseMessage DeleteData(string application, string container, int dataId)
+        public HttpResponseMessage DeleteData(string application, string container, string dataName)
         {
             try
             {
-                DbHelper.DeleteData(application, container, dataId);
+                DbHelper.DeleteData(application, container, dataName);
                 return RequestHelper.CreateMessage(Request, "Data resource was deleted");
             }
             catch (Exception e)

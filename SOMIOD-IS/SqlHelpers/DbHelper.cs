@@ -535,7 +535,7 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-        public static void DeleteData(string appName, string containerName, int dataId)
+        public static void DeleteData(string appName, string containerName, string dataName)
         {
             using (var dbConn = new DbConnection())
             using (var db = dbConn.Open())
@@ -545,18 +545,19 @@ namespace SOMIOD_IS.SqlHelpers
                 {
                     int parentId = IsContainerParentValid(db, appName, containerName);
 
-                    var cmdText = "SELECT c.Id, d.Id, d.Content FROM Container c JOIN Data d ON (d.Parent = c.Id) WHERE d.Id=@DataId AND c.Name=@containerName";
+                    var cmdText = "SELECT c.Id, d.Id, d.Content FROM Container c JOIN Data d ON (d.Parent = c.Id) WHERE d.Name=@DataName AND c.Name=@containerName";
                     string dataContent;
 
                     using (var cmd = new SqlCommand(cmdText, db, transaction))
                     {
-                        cmd.Parameters.AddWithValue("@DataId", dataId);
+                        cmd.Parameters.AddWithValue("@DataName", dataName);
                         cmd.Parameters.AddWithValue("@containerName", containerName.ToLower());
 
                         using (var reader = cmd.ExecuteReader())
                         {
                             if (!reader.Read())
-                                throw new ModelNotFoundException("A data resource with the Id #" + dataId + " does not exist in the container " + containerName, false);
+                                throw new ModelNotFoundException("A data resource with the Name #" + dataName + " does not exist in the container " + containerName, false);
+
 
                             dataContent = reader.GetString(2);
                         }
@@ -564,7 +565,7 @@ namespace SOMIOD_IS.SqlHelpers
 
                     using (var deleteCmd = new SqlCommand("DELETE FROM Data WHERE Id=@Id", db, transaction))
                     {
-                        deleteCmd.Parameters.AddWithValue("@Id", dataId);
+                        deleteCmd.Parameters.AddWithValue("@Id", dataName);
 
                         int rowChng = deleteCmd.ExecuteNonQuery();
                         if (rowChng != 1)
