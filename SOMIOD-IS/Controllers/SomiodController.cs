@@ -297,7 +297,7 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
-        [Route("api/somiod/{application}/{container}/data/{dataId}")]
+        [Route("api/somiod/{application}/{container}/data/{dataName}")]
         public HttpResponseMessage DeleteData(string application, string container, string dataName)
         {
             try
@@ -317,6 +317,63 @@ namespace SOMIOD_IS.Controllers
         #endregion
 
         #region Subscription
+
+        [HttpGet]
+        [Route("api/somiod/{application}/{container}/sub")]
+        public HttpResponseMessage GetSubscriptions(string application, string container)
+        {
+            try
+            {
+                if (Request.Headers.Contains("somiod-discover"))
+                {
+                    // Get the values of the "somiod-discover" header
+                    IEnumerable<string> headerValues = Request.Headers.GetValues("somiod-discover");
+
+                    // Assuming you only expect one value for the header, you can retrieve it like this
+                    string discoverHeaderValue = headerValues.FirstOrDefault();
+
+                    if (discoverHeaderValue == "subs")
+                    {
+                        try
+                        {
+                            var subscriptions = DbHelper.GetSubscriptions(application,container);
+                            return RequestHelper.CreateMessage(Request, subscriptions);
+                        }
+                        catch (Exception e)
+                        {
+                            return RequestHelper.CreateError(Request, e);
+                        }
+                    }
+                    else
+                    {
+                        throw new UnprocessableEntityException("Header esta a vazio ou errado");
+                    }
+                }
+                else
+                {
+                    throw new UnprocessableEntityException("Header em falta ou errado");
+                }
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
+
+        [HttpGet]
+        [Route("api/somiod/{application}/{container}/sub/{subscription}")]
+        public HttpResponseMessage GetSubscription(string application, string container, string subscription)
+        {
+            try
+            {
+                var subs = DbHelper.GetSubscription(application, container, subscription);
+                return RequestHelper.CreateMessage(Request, subs);
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
 
         [Route("api/somiod/{application}/{container}/sub")]
         public HttpResponseMessage PostSubscription(string application, string container, [FromBody] Subscription newSubscription)

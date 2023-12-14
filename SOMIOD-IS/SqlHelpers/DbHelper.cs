@@ -600,6 +600,76 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
+        public static List<Subscription> GetSubscriptions(string appName, string containerName)
+        {
+            var subscriptions = new List<Subscription>();
+
+            using (var connection = new DbConnection())
+            {
+                var db = connection.Open();
+
+                int parentId = IsContainerParentValid(db, appName, containerName);
+
+                string query = "SELECT * FROM Subscription s JOIN Container c ON (s.Parent = c.Id) WHERE c.Name=@containerName";
+
+                using (SqlCommand command = new SqlCommand(query, db))
+                {
+                    command.Parameters.AddWithValue("@Parent", parentId);
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            string name = reader.GetString(reader.GetOrdinal("Name"));
+                            var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
+                            int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
+                            string @event = reader.GetString(reader.GetOrdinal("Event"));
+                            string endpoint = reader.GetString(reader.GetOrdinal("Endpoint"));
+
+                            subscriptions.Add(new Subscription(id, name, time, parentid, @event, endpoint));
+                        }
+                        reader.Close();
+                    }
+                }
+                return subscriptions;
+            }
+        }
+
+        public static Subscription GetSubscription(string appName, string containerName, string subscriptionName)
+        {
+            using (var connection = new DbConnection())
+            {
+                var db = connection.Open();
+
+                int parentId = IsContainerParentValid(db, appName, containerName);
+
+                string query = "SELECT * FROM Subscription WHERE Id=@Id";
+
+                using (SqlCommand command = new SqlCommand(query, db))
+                {
+                    command.Parameters.AddWithValue("@Parent", parentId);
+                    command.Parameters.AddWithValue("@Name", subscriptionName.ToLower());
+
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            string name = reader.GetString(reader.GetOrdinal("Name"));
+                            var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
+                            int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
+                            string @event = reader.GetString(reader.GetOrdinal("Event"));
+                            string endpoint = reader.GetString(reader.GetOrdinal("Endpoint"));
+
+                            return new Subscription(id, name, time, parentid, @event, endpoint);
+                        }
+                        return null;
+                    }
+                }
+            }
+        }
+
         public static void CreateSubscription(string appName, string containerName, Subscription subscription)
         {
             using (var dbConn = new DbConnection())
