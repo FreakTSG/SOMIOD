@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Data.Common;
 using System.Reflection;
 using Container = SOMIOD_IS.Models.Container;
+using System.Web.UI.WebControls;
 
 namespace SOMIOD_IS.SqlHelpers
 {
@@ -78,9 +79,9 @@ namespace SOMIOD_IS.SqlHelpers
         #region Application
 
         //Get all applications
-        public static List<Application> GetApplications()
+        public static List<string> GetApplications()
         {
-            List<Application> data = new List<Application> ();
+            List<string> data = new List<string> ();
 
             using (var connection = new DbConnection())
             {
@@ -93,11 +94,13 @@ namespace SOMIOD_IS.SqlHelpers
                     {
                         while (reader.Read())
                         {
-                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            //int id = reader.GetInt32(reader.GetOrdinal("Id"));
                             string name = reader.GetString(reader.GetOrdinal("Name"));
-                            var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
+                            //var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
 
-                            data.Add(new Application(id,name,time));
+                            //data.Add(new Application(id,name,time));
+
+                            data.Add(name);
                         }
                         reader.Close();
                     }
@@ -234,9 +237,9 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-        public static List<Container> GetContainers(string appName)
+        public static List<string> GetContainers(string appName)
         {
-            var container = new List<Container>();
+            var container = new List<string>();
 
             using (var connection = new DbConnection())
             {
@@ -253,12 +256,12 @@ namespace SOMIOD_IS.SqlHelpers
                     {
                         while (reader.Read())
                         {
-                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            //int id = reader.GetInt32(reader.GetOrdinal("Id"));
                             string name = reader.GetString(reader.GetOrdinal("Name"));
-                            var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
-                            int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
+                            //var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
+                            //int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
 
-                            container.Add(new Models.Container(id, name, time, parentid));
+                            container.Add(name);
                         }
                         reader.Close();
                     }
@@ -295,7 +298,7 @@ namespace SOMIOD_IS.SqlHelpers
 
                             //falta aqui a linha que vai buscar a data relativa a este container
 
-                            return new Models.Container(id, name, time, parentid);
+                            return new Container(id, name, time, parentid);
                         }
                         else
                         {
@@ -502,9 +505,9 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-        public static List<Data> GetDatas(string appName, string containerName)
+        public static List<string> GetDatas(string appName, string containerName)
         {
-            var datas = new List<Data>();
+            var datas = new List<string>();
 
             using (var connection = new DbConnection())
             {
@@ -522,13 +525,15 @@ namespace SOMIOD_IS.SqlHelpers
                     {
                         while (reader.Read())
                         {
-                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            //int id = reader.GetInt32(reader.GetOrdinal("Id"));
                             string name = reader.GetString(reader.GetOrdinal("Name"));
-                            string content = reader.GetString(reader.GetOrdinal("Content"));
-                            DateTime creationdate = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
-                            int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
+                            //string content = reader.GetString(reader.GetOrdinal("Content"));
+                            //DateTime creationdate = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
+                            //int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
 
-                            datas.Add(new Data(id, name, content, creationdate, parentid));
+                            //datas.Add(new Data(id, name, content, creationdate, parentid));
+
+                            datas.Add(name);
                         }
                         reader.Close();
                     }
@@ -671,9 +676,9 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-        public static List<Subscription> GetSubscriptions(string appName, string containerName)
+        public static List<string> GetSubscriptions(string appName, string containerName)
         {
-            var subscriptions = new List<Subscription>();
+            var subscriptions = new List<string>();
 
             using (var connection = new DbConnection())
             {
@@ -691,14 +696,15 @@ namespace SOMIOD_IS.SqlHelpers
                     {
                         while (reader.Read())
                         {
-                            int id = reader.GetInt32(reader.GetOrdinal("Id"));
+                            //int id = reader.GetInt32(reader.GetOrdinal("Id"));
                             string name = reader.GetString(reader.GetOrdinal("Name"));
-                            var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
-                            int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
-                            string @event = reader.GetString(reader.GetOrdinal("Event"));
-                            string endpoint = reader.GetString(reader.GetOrdinal("Endpoint"));
+                            //var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
+                            //int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
+                            //string @event = reader.GetString(reader.GetOrdinal("Event"));
+                            //string endpoint = reader.GetString(reader.GetOrdinal("Endpoint"));
 
-                            subscriptions.Add(new Subscription(id, name, time, parentid, @event, endpoint));
+                            //subscriptions.Add(new Subscription(id, name, time, parentid, @event, endpoint));
+                            subscriptions.Add(name);
                         }
                         reader.Close();
                     }
