@@ -11,6 +11,7 @@ using System.Data.Common;
 using System.Reflection;
 using Container = SOMIOD_IS.Models.Container;
 using System.Web.UI.WebControls;
+using System.Xml.Linq;
 
 namespace SOMIOD_IS.SqlHelpers
 {
@@ -239,17 +240,15 @@ namespace SOMIOD_IS.SqlHelpers
 
         public static List<string> GetContainers(string appName)
         {
-            var container = new List<string>();
+            var containers = new List<string>();
 
             using (var connection = new DbConnection())
             {
                 var db = connection.Open();
 
-                string query = "SELECT * FROM Container c JOIN Application a ON (c.Parent = a.Id) WHERE a.Name=@AppName";
+                string query = "SELECT * FROM Container c INNER JOIN Application a ON(c.Parent = a.Id) WHERE a.Name = @AppName";
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
-
-
                     command.Parameters.AddWithValue("@AppName", appName.ToLower());
 
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -261,12 +260,12 @@ namespace SOMIOD_IS.SqlHelpers
                             //var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
                             //int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
 
-                            container.Add(name);
+                            containers.Add(name);
                         }
                         reader.Close();
                     }
                 }
-                return container;
+                return containers;
             }
         }
 

@@ -167,7 +167,7 @@ namespace SOMIOD_IS.Controllers
                     // Assuming you only expect one value for the header, you can retrieve it like this
                     string discoverHeaderValue = headerValues.FirstOrDefault();
 
-                    if (discoverHeaderValue == "container")
+                    if (discoverHeaderValue == "containers")
                     {
                         try
                         {
