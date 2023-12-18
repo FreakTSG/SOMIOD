@@ -28,13 +28,34 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.PortaoImage = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.PortaoImage)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // PortaoImage
+            // 
+            this.PortaoImage.Location = new System.Drawing.Point(27, 24);
+            this.PortaoImage.Name = "PortaoImage";
+            this.PortaoImage.Size = new System.Drawing.Size(437, 391);
+            this.PortaoImage.TabIndex = 0;
+            this.PortaoImage.TabStop = false;
+            // 
+            // Form1
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(488, 450);
+            this.Controls.Add(this.PortaoImage);
+            this.Name = "Form1";
             this.Text = "Form1";
+            ((System.ComponentModel.ISupportInitialize)(this.PortaoImage)).EndInit();
+            this.ResumeLayout(false);
+
         }
 
         #endregion
+
+        private System.Windows.Forms.PictureBox PortaoImage;
     }
 }
 
