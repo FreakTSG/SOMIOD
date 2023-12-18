@@ -43,7 +43,7 @@ namespace App1.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("portao")]
+        [global::System.Configuration.DefaultSettingValueAttribute("casa")]
         public string ApplicationName {
             get {
                 return ((string)(this["ApplicationName"]));
@@ -65,6 +65,42 @@ namespace App1.Properties {
         public float CustomApiError {
             get {
                 return ((float)(this["CustomApiError"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("garagem")]
+        public string ContainerName {
+            get {
+                return ((string)(this["ContainerName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("portao")]
+        public string SubscriptionName {
+            get {
+                return ((string)(this["SubscriptionName"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("CREATE")]
+        public string Event {
+            get {
+                return ((string)(this["Event"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.0.0.1")]
+        public string EndPoint {
+            get {
+                return ((string)(this["EndPoint"]));
             }
         }
     }

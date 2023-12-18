@@ -9,13 +9,25 @@
       <Value Profile="(Default)">garagem</Value>
     </Setting>
     <Setting Name="ApplicationName" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">portao</Value>
+      <Value Profile="(Default)">casa</Value>
     </Setting>
     <Setting Name="ApiBaseUrl" Type="System.String" Scope="Application">
       <Value Profile="(Default)">http://localhost:57380/</Value>
     </Setting>
     <Setting Name="CustomApiError" Type="System.Single" Scope="Application">
       <Value Profile="(Default)">422</Value>
+    </Setting>
+    <Setting Name="ContainerName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">garagem</Value>
+    </Setting>
+    <Setting Name="SubscriptionName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">portao</Value>
+    </Setting>
+    <Setting Name="Event" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">CREATE</Value>
+    </Setting>
+    <Setting Name="EndPoint" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">127.0.0.1</Value>
     </Setting>
   </Settings>
 </SettingsFile>

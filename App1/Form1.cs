@@ -18,6 +18,7 @@ using System.Text.Json;
 using App1.Properties;
 using System.IO;
 using System.Xml.Serialization;
+using Container = App1.Models.Container;
 
 namespace App1
 {
@@ -28,6 +29,10 @@ namespace App1
         private static readonly HttpStatusCode CustomApiError = (HttpStatusCode)Default.CustomApiError;
         private static readonly string AppName = Default.ApplicationName;
         private static readonly string ApiBaseUrl = Default.ApiBaseUrl;
+        private static readonly string ContainerName = Default.ContainerName;
+        private static readonly string SubscriptionName = Default.SubscriptionName;
+        private static readonly string Event = Default.Event;
+        private static readonly string EndPoint = Default.EndPoint;
 
         private MqttClient _mClient;
         private readonly RestClient _restClient = new RestClient(ApiBaseUrl);
@@ -130,6 +135,67 @@ namespace App1
 
         }
         
+        private void CreateContainer(string containerName, string applicationName) 
+        {
+            var container = new Container(containerName, applicationName);
+
+            var request = new RestRequest($"api/somiod/{applicationName}", Method.Post);
+
+            request.AddObject(container);
+
+            var response = _restClient.Execute(request);
+
+            if (CheckEntityAlreadyExists(response)) return;
+
+            if(response.StatusCode != 0)
+            {
+                MessageBox.Show("Could not connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                MessageBox.Show("An error occurred while creating the container", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void CreateSubscription(string subscriptionName, string applicationName, string containerName, string Event, string endPoint)
+        {
+            var subscription = new Subscription(subscriptionName, containerName, Event, endPoint);
+
+            var request = new RestRequest($"api/somiod/{applicationName}/{containerName}/sub", Method.Post);
+
+            request.AddObject(subscription);
+
+            var response = _restClient.Execute(request);
+
+            if (CheckEntityAlreadyExists(response)) return;
+
+            if (response.StatusCode != 0)
+            {
+                MessageBox.Show("Could not connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                MessageBox.Show("An error occurred while creating the subscription", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void Form1Initialize(object sender, EventArgs e)
+        {
+            ConnectToBroker();
+            SubscribeToTopics();
+            CreateApplication(AppName);
+            CreateContainer(ContainerName,AppName);
+            CreateSubscription(SubscriptionName,AppName,ContainerName, Event, EndPoint);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (_mClient.IsConnected)
+            {
+                _mClient.Unsubscribe(Topic);
+                _mClient.Disconnect();
+            }
+        }
         #endregion
 
     }

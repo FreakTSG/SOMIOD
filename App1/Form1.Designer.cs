@@ -48,6 +48,8 @@
             this.Controls.Add(this.PortaoImage);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.Shown += new System.EventHandler(this.Form1Initialize);
             ((System.ComponentModel.ISupportInitialize)(this.PortaoImage)).EndInit();
             this.ResumeLayout(false);
 
