@@ -14,9 +14,6 @@
     <Setting Name="ApiBaseUrl" Type="System.String" Scope="Application">
       <Value Profile="(Default)">http://localhost:57380/</Value>
     </Setting>
-    <Setting Name="CustomApiError" Type="System.Single" Scope="Application">
-      <Value Profile="(Default)">422</Value>
-    </Setting>
     <Setting Name="ContainerName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">garagem</Value>
     </Setting>

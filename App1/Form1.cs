@@ -25,8 +25,7 @@ namespace App1
     public partial class Form1 : Form
     {
         private static readonly string BrokerIp = Default.brokerIpAddress;
-        private static readonly string[] Topic = {Default.Topic};
-        private static readonly HttpStatusCode CustomApiError = (HttpStatusCode)Default.CustomApiError;
+        private static readonly string[] Topic = { Default.Topic };
         private static readonly string AppName = Default.ApplicationName;
         private static readonly string ApiBaseUrl = Default.ApiBaseUrl;
         private static readonly string ContainerName = Default.ContainerName;
@@ -43,6 +42,7 @@ namespace App1
             InitializeComponent();
         }
 
+
         #region Helpers
 
         private string DeserializeError(RestResponse response)
@@ -52,7 +52,7 @@ namespace App1
         }
         private bool CheckEntityAlreadyExists(RestResponse response)
         {
-            if (response.StatusCode == CustomApiError)
+            if (response.StatusCode == (HttpStatusCode)422)
                 if (DeserializeError(response).Contains("already exists"))
                     return true;
 
@@ -80,7 +80,7 @@ namespace App1
                 var not = (Notification)new XmlSerializer(typeof(Notification)).Deserialize(reader);
                 if (not.EventType != "CREATE") return;
 
-                _openGarage = not.Content == "ON";
+                _openGarage = not.Content == "Abrir";
                 UpdateDoorState();
             }
 

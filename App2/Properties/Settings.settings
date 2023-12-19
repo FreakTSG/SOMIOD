@@ -1,7 +1,18 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="App2.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ApplicationName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">casa</Value>
+    </Setting>
+    <Setting Name="ContainerName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">garagem</Value>
+    </Setting>
+    <Setting Name="DataName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">comando</Value>
+    </Setting>
+    <Setting Name="ApiBaseUrl" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://localhost:57380/</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>
