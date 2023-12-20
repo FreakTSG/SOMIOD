@@ -1,4 +1,9 @@
-﻿CREATE TABLE [dbo].[Application] (
+﻿DROP TABLE Subscription;
+DROP TABLE Data;
+DROP TABLE Container;
+DROP TABLE Application;
+
+CREATE TABLE [dbo].[Application] (
     [Id] INT IDENTITY(1,1) NOT NULL,
     [Name] VARCHAR(50) NOT NULL UNIQUE,
     [CreationDate] DATETIME NOT NULL,
@@ -17,7 +22,7 @@ CREATE TABLE [dbo].[Container] (
 
 CREATE TABLE [dbo].[Subscription] (
     [Id] INT IDENTITY(1,1) NOT NULL,
-    [Name] VARCHAR(50) NOT NULL,
+    [Name] VARCHAR(50) NOT NULL UNIQUE,
     [CreationDate] DATETIME NOT NULL,
     [Parent] INT NOT NULL,
     [Event] VARCHAR(50) NOT NULL,
@@ -29,7 +34,7 @@ CREATE TABLE [dbo].[Subscription] (
 
 CREATE TABLE [dbo].[Data] (
     [Id] INT IDENTITY(1,1) NOT NULL,
-    [Name] VARCHAR(50) NOT NULL,
+    [Name] VARCHAR(50) NOT NULL UNIQUE,
     [Content] VARCHAR(50) NOT NULL,
     [CreationDate] DATETIME NOT NULL,
     [Parent] INT NOT NULL,

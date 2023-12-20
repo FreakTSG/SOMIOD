@@ -511,11 +511,10 @@ namespace SOMIOD_IS.SqlHelpers
 
                 int parentId = IsContainerParentValid(db, appName, containerName);
 
-                string query = "SELECT * FROM Data WHERE Id=@Id";
+                string query = "SELECT * FROM Data WHERE Name=@Name";
 
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
-                    command.Parameters.AddWithValue("@Parent", parentId);
                     command.Parameters.AddWithValue("@Name", dataName.ToLower());
 
                     using (SqlDataReader reader = command.ExecuteReader())
@@ -572,17 +571,17 @@ namespace SOMIOD_IS.SqlHelpers
         public static void DeleteData(string appName, string containerName, string dataName)
         {
             using (var dbConn = new DbConnection())
-            using (var db = dbConn.Open())
-            using (var transaction = db.BeginTransaction())
             {
                 try
                 {
+                    var db = dbConn.Open();
+
                     int parentId = IsContainerParentValid(db, appName, containerName);
 
                     var cmdText = "SELECT c.Id, d.Id, d.Content FROM Container c JOIN Data d ON (d.Parent = c.Id) WHERE d.Name=@DataName AND c.Name=@containerName";
                     string dataContent;
 
-                    using (var cmd = new SqlCommand(cmdText, db, transaction))
+                    using (var cmd = new SqlCommand(cmdText, db))
                     {
                         cmd.Parameters.AddWithValue("@DataName", dataName);
                         cmd.Parameters.AddWithValue("@containerName", containerName.ToLower());
@@ -596,10 +595,12 @@ namespace SOMIOD_IS.SqlHelpers
                             dataContent = reader.GetString(2);
                         }
                     }
+                    //Nao sei o que e que a parte acima faz
+                    var sql = "DELETE FROM Data WHERE Name=@DataName";
 
-                    using (var deleteCmd = new SqlCommand("DELETE FROM Data WHERE Id=@Id", db, transaction))
+                    using (var deleteCmd = new SqlCommand(sql, db))
                     {
-                        deleteCmd.Parameters.AddWithValue("@Id", dataName);
+                        deleteCmd.Parameters.AddWithValue("@DataName", dataName);
 
                         int rowChng = deleteCmd.ExecuteNonQuery();
                         if (rowChng != 1)
@@ -607,12 +608,9 @@ namespace SOMIOD_IS.SqlHelpers
 
                         NotifySubscriptions(db, parentId, containerName, "DELETE", dataContent);
                     }
-
-                    transaction.Commit();
                 }
                 catch (Exception)
                 {
-                    transaction.Rollback();
                     throw;
                 }
             }
