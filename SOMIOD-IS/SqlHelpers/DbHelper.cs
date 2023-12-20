@@ -643,6 +643,51 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
+        public static void UpdateData(string appName, string containerName, string dataName, string newDataContent)
+        {
+            using (var dbConn = new DbConnection())
+            {
+                var db = dbConn.Open();
+                try
+                {
+                    int parentId = IsContainerParentValid(db, appName, containerName);
+
+                    string currentDataContent;
+                    var selectCmdText = "SELECT Content FROM Data WHERE Name=@DataName";
+                    using (var selectCmd = new SqlCommand(selectCmdText, db))
+                    {
+                        selectCmd.Parameters.AddWithValue("@DataName", dataName.ToLower());
+
+                        using (var reader = selectCmd.ExecuteReader())
+                        {
+                            if (!reader.Read())
+                                throw new ModelNotFoundException("A data resource with the Name #" + dataName + " does not exist in the container " + containerName, false);
+
+                            currentDataContent = reader.GetString(0);
+                        }
+                    }
+
+                    var updateCmdText = "UPDATE Data SET Content = @Content WHERE Name = @DataName";
+                    using (var updateCmd = new SqlCommand(updateCmdText, db))
+                    {
+                        updateCmd.Parameters.AddWithValue("@Content", newDataContent);
+                        updateCmd.Parameters.AddWithValue("@DataName", dataName.ToLower());
+
+                        int rowChng = updateCmd.ExecuteNonQuery();
+                        if (rowChng != 1)
+                            throw new UntreatedSqlException();
+
+                        NotifySubscriptions(db, parentId, containerName, "UPDATE", currentDataContent);
+                    }
+                }
+                catch (SqlException)
+                {
+                    throw new UntreatedSqlException();
+                }
+            }
+        }
+
+
         #endregion
 
         #region Subscription
@@ -699,7 +744,7 @@ namespace SOMIOD_IS.SqlHelpers
 
                 int parentId = IsContainerParentValid(db, appName, containerName);
 
-                string query = "SELECT * FROM Subscription WHERE Id=@Id";
+                string query = "SELECT * FROM Subscription WHERE Name=@Name AND Parent=@Parent";
 
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
@@ -775,6 +820,36 @@ namespace SOMIOD_IS.SqlHelpers
                     throw new ModelNotFoundException("Subscription");
             }
         }
+        public static void UpdateSubscription(string appName, string containerName, string subscriptionName, Subscription updatedSubscription)
+        {
+            using (var dbConn = new DbConnection())
+            {
+                var db = dbConn.Open();
+
+                int parentId = IsContainerParentValid(db, appName, containerName);
+
+                var cmdText = "UPDATE Subscription SET Event = @Event, Endpoint = @Endpoint WHERE Name = @Name AND Parent = @Parent";
+                using (var cmd = new SqlCommand(cmdText, db))
+                {
+                    cmd.Parameters.AddWithValue("@Name", subscriptionName.ToLower());
+                    cmd.Parameters.AddWithValue("@Event", updatedSubscription.Event.ToUpper());
+                    cmd.Parameters.AddWithValue("@Endpoint", updatedSubscription.Endpoint.ToLower());
+                    cmd.Parameters.AddWithValue("@Parent", parentId);
+
+                    try
+                    {
+                        int rowChng = cmd.ExecuteNonQuery();
+                        if (rowChng != 1)
+                            throw new ModelNotFoundException("Subscription");
+                    }
+                    catch (SqlException e)
+                    {
+                        ProcessSqlExceptionSubscription(e);
+                    }
+                }
+            }
+        }
+
 
         #endregion
 

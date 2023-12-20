@@ -369,6 +369,31 @@ namespace SOMIOD_IS.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("api/somiod/{application}/{container}/data/{dataName}")]
+        public HttpResponseMessage PutData(string application, string container, string dataName, [FromBody] Data updatedData)
+        {
+            try
+            {
+                if (updatedData == null)
+                    throw new UnprocessableEntityException("You must provide data with content in the correct xml format");
+
+                if (string.IsNullOrEmpty(updatedData.Content))
+                    throw new UnprocessableEntityException("You must include content for the data resource");
+
+                DbHelper.UpdateData(application, container, dataName, updatedData.Content);
+
+                return RequestHelper.CreateMessage(Request, "Data resource was updated successfully");
+            }
+            catch (Exception e)
+            {
+                if (e is BrokerException)
+                    return RequestHelper.CreateMessage(Request, "Data resource was updated but could not notify at least one of the subscribers. Error: " + e.Message);
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
+
+
 
         #endregion
 
@@ -470,6 +495,28 @@ namespace SOMIOD_IS.Controllers
                 return RequestHelper.CreateError(Request, e);
             }
         }
+
+        [HttpPut]
+        [Route("api/somiod/{application}/{container}/sub/{subscriptionName}")]
+        public HttpResponseMessage PutSubscription(string application, string container, string subscriptionName, [FromBody] Subscription updatedSubscription)
+        {
+            try
+            {
+                if (updatedSubscription == null)
+                    throw new UnprocessableEntityException("You must provide subscription details in the correct format");
+
+                if (string.IsNullOrEmpty(updatedSubscription.Event) || string.IsNullOrEmpty(updatedSubscription.Endpoint))
+                    throw new UnprocessableEntityException("You must include both the event type and endpoint for the subscription");
+
+                DbHelper.UpdateSubscription(application, container, subscriptionName, updatedSubscription);
+                return Request.CreateResponse(HttpStatusCode.OK, "Subscription updated");
+            }
+            catch (Exception e)
+            {
+                return RequestHelper.CreateError(Request, e);
+            }
+        }
+
 
         #endregion
 
