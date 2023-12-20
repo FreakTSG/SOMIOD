@@ -444,39 +444,6 @@ namespace SOMIOD_IS.SqlHelpers
 
         #region Data
 
-        private static List<Data> GetDataResourcesForContainer(int parentId)
-        {
-            var dataRes = new List<Data>();
-
-            using (var dbConn = new DbConnection())
-            using (var db = dbConn.Open())
-            {
-                var cmdText = "SELECT * FROM Data WHERE Parent=@Parent";
-                using (var cmd = new SqlCommand(cmdText, db))
-                {
-                    cmd.Parameters.AddWithValue("@Parent", parentId);
-
-                    try
-                    {
-                        using (var reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                dataRes.Add(new Data(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetDateTime(3), reader.GetInt32(4)));
-                            }
-                        }
-                    }
-                    catch (SqlException e)
-                    {
-                        // Handle or log the exception as needed
-                        throw new ApplicationException("Database operation failed", e);
-                    }
-                }
-            }
-
-            return dataRes;
-        }
-
         private static void NotifySubscriptions(SqlConnection db, int parentId, string containerName, string eventType, string data)
         {
             try
@@ -514,24 +481,19 @@ namespace SOMIOD_IS.SqlHelpers
 
                 int parentId = IsContainerParentValid(db, appName, containerName);
 
-                string query = "SELECT * FROM Data d JOIN Container c ON (d.Parent = c.Id) WHERE c.Name=@containerName";
+                string query = "SELECT * FROM Data d JOIN Container c ON d.Parent = c.Id JOIN Application a ON c.Parent = a.Id WHERE a.Name = @appName AND c.Name = @containerName";
 
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
-                    command.Parameters.AddWithValue("@Parent", parentId);
+                    command.Parameters.AddWithValue("@appName", appName);
+                    command.Parameters.AddWithValue("@containerName", containerName);
 
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            //int id = reader.GetInt32(reader.GetOrdinal("Id"));
                             string name = reader.GetString(reader.GetOrdinal("Name"));
-                            //string content = reader.GetString(reader.GetOrdinal("Content"));
-                            //DateTime creationdate = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
-                            //int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
-
-                            //datas.Add(new Data(id, name, content, creationdate, parentid));
-
+                            
                             datas.Add(name);
                         }
                         reader.Close();
@@ -574,20 +536,19 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-        public static void CreateData(string appName, string containerName, string dataContent)
+        public static void CreateData(string appName, string containerName, string dataContent, string dataName)
         {
             using (var dbConn = new DbConnection())
-            using (var db = dbConn.Open())
-            using (var transaction = db.BeginTransaction())
             {
+                var db = dbConn.Open();
                 try
                 {
                     int parentId = IsContainerParentValid(db, appName, containerName);
 
                     var cmdText = "INSERT INTO Data (Name, Content, CreationDate, Parent) VALUES (@Name, @Content, @CreationDate, @Parent)";
-                    using (var cmd = new SqlCommand(cmdText, db, transaction))
+                    using (var cmd = new SqlCommand(cmdText, db))
                     {
-                        cmd.Parameters.AddWithValue("@Name", containerName.ToLower());
+                        cmd.Parameters.AddWithValue("@Name", dataName.ToLower());
                         cmd.Parameters.AddWithValue("@Content", dataContent);
                         cmd.Parameters.AddWithValue("@CreationDate", DateTime.Now);
                         cmd.Parameters.AddWithValue("@Parent", parentId);
@@ -600,11 +561,9 @@ namespace SOMIOD_IS.SqlHelpers
                         NotifySubscriptions(db, parentId, containerName, "CREATE", dataContent);
                     }
 
-                    transaction.Commit();
                 }
                 catch (SqlException)
                 {
-                    transaction.Rollback();
                     throw new UntreatedSqlException();
                 }
             }

@@ -290,7 +290,7 @@ namespace SOMIOD_IS.Controllers
                     {
                         try
                         {
-                            var datas = DbHelper.GetSubscriptions(application, container);
+                            var datas = DbHelper.GetDatas(application, container);
                             return RequestHelper.CreateMessage(Request, datas);
                         }
                         catch (Exception e)
@@ -342,7 +342,7 @@ namespace SOMIOD_IS.Controllers
                     throw new UnprocessableEntityException("You must provide an data with a name in the correct xml format");
                 if(string.IsNullOrEmpty(newData.Content))
                     throw new UnprocessableEntityException("You must include content for that data resource");
-                DbHelper.CreateData(application, container, newData.Content);
+                DbHelper.CreateData(application, container, newData.Content, newData.Name);
                 return RequestHelper.CreateMessage(Request, "Data created");
             }
             catch (Exception e)
