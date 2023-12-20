@@ -53,7 +53,8 @@ namespace App2
 
         private void CreateData(string dataName, string applicationName, string containerName, string content)
         {
-            var data = new Data(dataName, content, containerName);
+            string uniqueName = $"{dataName}_{DateTime.Now:yyyyMMddHHmmssfff}";
+            var data = new Data(uniqueName, content, containerName);
 
             var request = new RestRequest($"api/somiod/{applicationName}/{containerName}/data", Method.Post);
 
