@@ -64,10 +64,17 @@ namespace App2
 
             if (CheckEntityAlreadyExists(response)) return;
 
-            if (response.StatusCode != 0)
+            if (response.StatusCode != HttpStatusCode.OK)
             {
-                MessageBox.Show("Could not connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                if (response.StatusCode == 0)
+                {
+                    MessageBox.Show("Could not connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    Console.WriteLine(response.Content);
+                    MessageBox.Show($"An error occurred while creating the data: {response.StatusCode}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
 
             if (response.StatusCode != HttpStatusCode.OK)

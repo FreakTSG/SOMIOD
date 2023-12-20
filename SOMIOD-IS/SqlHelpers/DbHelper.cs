@@ -562,7 +562,7 @@ namespace SOMIOD_IS.SqlHelpers
             }
         }
 
-        public static void CreateData(string appName, string containerName, string dataContent, string dataName)
+        public static void CreateData(string appName, string containerName, Data data)
         {
             using (var dbConn = new DbConnection())
             {
@@ -574,8 +574,8 @@ namespace SOMIOD_IS.SqlHelpers
                     var cmdText = "INSERT INTO Data (Name, Content, CreationDate, Parent) VALUES (@Name, @Content, @CreationDate, @Parent)";
                     using (var cmd = new SqlCommand(cmdText, db))
                     {
-                        cmd.Parameters.AddWithValue("@Name", dataName.ToLower());
-                        cmd.Parameters.AddWithValue("@Content", dataContent);
+                        cmd.Parameters.AddWithValue("@Name", data.Name.ToLower());
+                        cmd.Parameters.AddWithValue("@Content", data.Content);
                         cmd.Parameters.AddWithValue("@CreationDate", DateTime.Now);
                         cmd.Parameters.AddWithValue("@Parent", parentId);
 
@@ -584,7 +584,7 @@ namespace SOMIOD_IS.SqlHelpers
                         if (rowChng != 1)
                             throw new UntreatedSqlException();
 
-                        NotifySubscriptions(db, parentId, containerName, "CREATE", dataContent);
+                        NotifySubscriptions(db, parentId, containerName, "CREATE", data.Content);
                     }
 
                 }

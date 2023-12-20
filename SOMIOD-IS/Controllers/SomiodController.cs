@@ -342,7 +342,7 @@ namespace SOMIOD_IS.Controllers
                     throw new UnprocessableEntityException("You must provide an data with a name in the correct xml format");
                 if(string.IsNullOrEmpty(newData.Content))
                     throw new UnprocessableEntityException("You must include content for that data resource");
-                DbHelper.CreateData(application, container, newData.Content, newData.Name);
+                DbHelper.CreateData(application, container, newData);
                 return RequestHelper.CreateMessage(Request, "Data created");
             }
             catch (Exception e)
