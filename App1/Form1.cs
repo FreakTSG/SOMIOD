@@ -121,7 +121,7 @@ namespace App1
 
             var response = _restClient.Execute(request);
 
-            if (CheckEntityAlreadyExists(response))
+            if (CheckEntityAlreadyExists(response) == true)
                 return;
 
             if (response.StatusCode == 0)

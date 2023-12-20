@@ -79,6 +79,19 @@ namespace SOMIOD_IS.SqlHelpers
 
         #region Application
 
+
+        private static void ProcessSqlExceptionApplication(SqlException e)
+        {
+            switch (e.Number)
+            {
+                // Cannot insert duplicate key in object
+                case 2627:
+                    throw new UnprocessableEntityException("An application with that name already exists");
+                default:
+                    throw new UntreatedSqlException(e);
+            }
+        }
+
         //Get all applications
         public static List<string> GetApplications()
         {
@@ -151,10 +164,17 @@ namespace SOMIOD_IS.SqlHelpers
                     // Execute the insert command
                     command.ExecuteNonQuery();
 
-                    // Retrieve the last identity value for the Application table
-                    string identityQuery = "SELECT IDENT_CURRENT('Application')";
-                    SqlCommand identityCommand = new SqlCommand(identityQuery, db);
-                    int newApplicationId = Convert.ToInt32(identityCommand.ExecuteScalar());
+                    try
+                    {
+                        int rowChng = command.ExecuteNonQuery();
+
+                        if (rowChng != 1)
+                            throw new UntreatedSqlException();
+                    }
+                    catch (SqlException e)
+                    {
+                        ProcessSqlExceptionApplication(e);
+                    }
                 }
             }
         }
@@ -170,9 +190,19 @@ namespace SOMIOD_IS.SqlHelpers
                 {
                     command.Parameters.AddWithValue("@Name", name.ToLower());
                     command.Parameters.AddWithValue("@NewName", newName.ToLower());
-                    
 
-                    command.ExecuteNonQuery();
+
+                    try
+                    {
+                        int rowChng = command.ExecuteNonQuery();
+
+                        if (rowChng != 1)
+                            throw new UntreatedSqlException();
+                    }
+                    catch (SqlException e)
+                    {
+                        ProcessSqlExceptionApplication(e);
+                    }
                 }
             }
         }
