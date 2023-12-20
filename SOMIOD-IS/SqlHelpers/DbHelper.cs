@@ -161,9 +161,6 @@ namespace SOMIOD_IS.SqlHelpers
                     command.Parameters.AddWithValue("@AppName", name.ToLower());
                     command.Parameters.AddWithValue("@CreationDate", DateTime.Now);
 
-                    // Execute the insert command
-                    command.ExecuteNonQuery();
-
                     try
                     {
                         int rowChng = command.ExecuteNonQuery();
@@ -672,24 +669,19 @@ namespace SOMIOD_IS.SqlHelpers
 
                 int parentId = IsContainerParentValid(db, appName, containerName);
 
-                string query = "SELECT * FROM Subscription s JOIN Container c ON (s.Parent = c.Id) WHERE c.Name=@containerName";
+                string query = "SELECT * FROM Subscription d JOIN Container c ON d.Parent = c.Id JOIN Application a ON c.Parent = a.Id WHERE a.Name = @appName AND c.Name = @containerName";
 
                 using (SqlCommand command = new SqlCommand(query, db))
                 {
-                    command.Parameters.AddWithValue("@Parent", parentId);
+                    command.Parameters.AddWithValue("@appName", appName);
+                    command.Parameters.AddWithValue("@containerName", containerName);
 
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            //int id = reader.GetInt32(reader.GetOrdinal("Id"));
                             string name = reader.GetString(reader.GetOrdinal("Name"));
-                            //var time = reader.GetDateTime(reader.GetOrdinal("CreationDate"));
-                            //int parentid = reader.GetInt32(reader.GetOrdinal("Parent"));
-                            //string @event = reader.GetString(reader.GetOrdinal("Event"));
-                            //string endpoint = reader.GetString(reader.GetOrdinal("Endpoint"));
 
-                            //subscriptions.Add(new Subscription(id, name, time, parentid, @event, endpoint));
                             subscriptions.Add(name);
                         }
                         reader.Close();

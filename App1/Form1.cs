@@ -52,10 +52,10 @@ namespace App1
         }
         private bool CheckEntityAlreadyExists(RestResponse response)
         {
-            if (response.StatusCode == (HttpStatusCode)422)
-                if (DeserializeError(response).Contains("already exists"))
-                    return true;
-
+            if (response.StatusCode == (HttpStatusCode)422) { 
+                //if (DeserializeError(response).Contains("already exists"))
+                return true;
+            }
             return false;
         }
 
@@ -121,8 +121,7 @@ namespace App1
 
             var response = _restClient.Execute(request);
 
-            if (CheckEntityAlreadyExists(response) == true)
-                return;
+            if (CheckEntityAlreadyExists(response) == true) return;
 
             if (response.StatusCode == 0)
             {
