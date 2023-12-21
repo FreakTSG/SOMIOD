@@ -27,6 +27,7 @@ namespace App2
         //Connection
         private readonly RestClient _restClient = new RestClient(ApiBaseUrl);
 
+
         public Sender()
         {
             InitializeComponent();
@@ -53,12 +54,15 @@ namespace App2
 
         private void CreateData(string dataName, string applicationName, string containerName, string content)
         {
+
             string uniqueName = $"{dataName}_{DateTime.Now:yyyyMMddHHmmssfff}";
-            var data = new Data(uniqueName, content, containerName);
+            var data = new Data(dataName,content);
 
             var request = new RestRequest($"api/somiod/{applicationName}/{containerName}/data", Method.Post);
 
             request.AddObject(data);
+
+            var bodyParameter = request.Parameters.FirstOrDefault(p => p.Type == ParameterType.RequestBody);
 
             var response = _restClient.Execute(request);
 

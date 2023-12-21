@@ -34,9 +34,11 @@
             // 
             // PortaoImage
             // 
-            this.PortaoImage.Location = new System.Drawing.Point(27, 24);
+            this.PortaoImage.Image = global::App1.Properties.Resources.fechado;
+            this.PortaoImage.Location = new System.Drawing.Point(21, 23);
             this.PortaoImage.Name = "PortaoImage";
             this.PortaoImage.Size = new System.Drawing.Size(437, 391);
+            this.PortaoImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.PortaoImage.TabIndex = 0;
             this.PortaoImage.TabStop = false;
             // 
