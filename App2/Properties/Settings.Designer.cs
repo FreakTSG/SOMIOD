@@ -58,5 +58,14 @@ namespace App2.Properties {
                 return ((string)(this["ApiBaseUrl"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("interruptor")]
+        public string InterruptorName {
+            get {
+                return ((string)(this["InterruptorName"]));
+            }
+        }
     }
 }

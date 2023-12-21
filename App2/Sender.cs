@@ -12,12 +12,14 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static App2.Properties.Settings;
+using Application = App2.Models.Application;
 
 namespace App2
 {
     public partial class Sender : Form
     {
         #region Constants
+        private static readonly string InterruptorName = Default.InterruptorName;
         private static readonly string ApplicationName = Default.ApplicationName;
         private static readonly string ContainerName = Default.ContainerName;
         private static readonly string DataName = Default.DataName;
@@ -43,7 +45,6 @@ namespace App2
         private bool CheckEntityAlreadyExists(RestResponse response)
         {
             if (response.StatusCode == (HttpStatusCode)422)
-                if (DeserializeError(response).Contains("already exists"))
                     return true;
 
             return false;
@@ -52,11 +53,33 @@ namespace App2
 
         #region API Calls
 
+        private void CreateApplication(string appName)
+        {
+            Application app = new Application(appName);
+
+            var request = new RestRequest("api/somiod", Method.Post);
+            request.AddObject(app);
+
+            var response = _restClient.Execute(request);
+
+            if (CheckEntityAlreadyExists(response) == true) return;
+
+            if (response.StatusCode == 0)
+            {
+                MessageBox.Show("Could not connect to the API", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (response.StatusCode != HttpStatusCode.OK)
+                MessageBox.Show("An error occurred while creating the application", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+        }
+
         private void CreateData(string dataName, string applicationName, string containerName, string content)
         {
 
             string uniqueName = $"{dataName}_{DateTime.Now:yyyyMMddHHmmssfff}";
-            var data = new Data(dataName,content);
+            var data = new Data(uniqueName, content);
 
             var request = new RestRequest($"api/somiod/{applicationName}/{containerName}/data", Method.Post);
 
@@ -95,6 +118,11 @@ namespace App2
         private void btn_Fechar_Click(object sender, EventArgs e)
         {
             CreateData(DataName, ApplicationName, ContainerName, "Fechar");
+        }
+
+        private void Sender_Initialize(object sender, EventArgs e)
+        {
+            CreateApplication(InterruptorName);
         }
     }
 }

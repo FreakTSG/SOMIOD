@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Exceptions;
 
@@ -7,21 +8,17 @@ namespace SOMIOD_IS.SqlHelpers
 {
     public static class BrokerHelper
     {
+        private static readonly string Guid = System.Guid.NewGuid().ToString();
         // Method to publish a notification message to an MQTT broker
         public static void FireNotification(string endPoint, string topic, Notification notification)
         {
-            MqttClient mClient = null;
-
             try
             {
                 // Initialize MQTT client with the provided endpoint
-                mClient = new MqttClient(endPoint);
-
-                // Generate a unique client ID for this connection
-                var clientId = System.Guid.NewGuid().ToString();
+                var mClient = new MqttClient(endPoint);
 
                 // Connect to the MQTT broker
-                mClient.Connect(clientId);
+                mClient.Connect(Guid);
 
                 // Check if the connection was successful
                 if (!mClient.IsConnected)
@@ -30,39 +27,19 @@ namespace SOMIOD_IS.SqlHelpers
                 // Serialize the notification object to XML and publish it to the specified topic
                 mClient.Publish(topic, Encoding.UTF8.GetBytes(XmlHelper.Serialize(notification).OuterXml));
 
-                // Callback mechanism
-                // For instance, using the Publish event of the client:
-                mClient.MqttMsgPublished += (sender, e) =>
+                if (mClient.IsConnected)
                 {
-                    if (e.IsPublished)
-                    {
-                        // Action to take if the message was successfully published
-                        Console.WriteLine($"Message with ID {e.MessageId} was successfully published.");
-                    }
-                    else
-                    {
-                        // Action to take if the message failed to publish
-                        Console.WriteLine($"Failed to publish message with ID {e.MessageId}.");
-                    }
-                };
-            }
-            catch (MqttConnectionException)
-            {
-                // Specific exception for MQTT connection issues
-                throw new BrokerException("Couldn't connect to message broker endpoint '" + endPoint + "'");
+                    Thread.Sleep(1000);
+                    mClient.Disconnect();
+                }
             }
             catch (Exception e)
             {
-                // General exception handling
-                throw new BrokerException("Error while sending notification: " + e.Message);
-            }
-            finally
-            {
-                // Ensure the client is properly disconnected and resources are released
-                if (mClient != null && mClient.IsConnected)
-                {
-                    mClient.Disconnect();
-                }
+                if (e is BrokerException) throw e;
+                else if (e is MqttConnectionException)
+                    throw new BrokerException("Couldn't connect to message broker endpoint '" + endPoint + "'");
+                else
+                    throw new BrokerException(e.Message);
             }
         }
     }

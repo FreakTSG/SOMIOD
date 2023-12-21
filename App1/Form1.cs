@@ -45,15 +45,10 @@ namespace App1
 
         #region Helpers
 
-        private string DeserializeError(RestResponse response)
-        {
-            var error = JsonSerializer.Deserialize<Error>(response.Content ?? string.Empty);
-            return error?.Message;
-        }
+        
         private bool CheckEntityAlreadyExists(RestResponse response)
         {
             if (response.StatusCode == (HttpStatusCode)422) { 
-                //if (DeserializeError(response).Contains("already exists"))
                 return true;
             }
             return false;

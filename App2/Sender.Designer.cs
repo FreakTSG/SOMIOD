@@ -52,15 +52,16 @@
             this.btn_Fechar.UseVisualStyleBackColor = true;
             this.btn_Fechar.Click += new System.EventHandler(this.btn_Fechar_Click);
             // 
-            // Form1
+            // Sender
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(492, 450);
             this.Controls.Add(this.btn_Fechar);
             this.Controls.Add(this.btn_Abrir);
-            this.Name = "Form1";
+            this.Name = "Sender";
             this.Text = "Form1";
+            this.Shown += new System.EventHandler(this.Sender_Initialize);
             this.ResumeLayout(false);
 
         }

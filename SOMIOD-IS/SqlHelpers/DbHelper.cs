@@ -490,11 +490,12 @@ namespace SOMIOD_IS.SqlHelpers
                             BrokerHelper.FireNotification(reader.GetString(5), containerName, notification);
                         }
                     }
+                    
                 }
             }
             catch (SqlException e)
             {
-                throw new BrokerException("An unknown database error (#" + e.Number + ") has happened while trying to notify subscriptions", e);
+                throw new BrokerException("An unknown database error (#" + e.Number + ") has happened while trying to notify subscriptions");
             }
         }
 
